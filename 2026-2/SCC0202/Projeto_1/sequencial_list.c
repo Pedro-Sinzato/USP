@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include "sequencial_list.h"
 
 //MUDAR int list para ITEM list[]
@@ -32,49 +33,47 @@ extern void delete_sequencial_list(SEQUENCIAL_LIST **sequencial_list)
     sequencial_list = NULL;
 }
 
-static void shift_right(SEQUENCIAL_LIST *sequencial_list, int range)
+static void shift_right(SEQUENCIAL_LIST *sequencial_list, int start, int end)
 {
-    for(int i = range + 1; i > 0; i--)
+    for(int i = end + 1; i > start; i--)
     {
         sequencial_list->list[i] = sequencial_list->list[i-1];
     }
 }
-static void shift_left(SEQUENCIAL_LIST *sequencial_list, int range)
+static void shift_left(SEQUENCIAL_LIST *sequencial_list, int start, int end)
 {
-    for(int i = 0; i < range; i++)
+    for(int i = start; i < end; i++)
     {
         sequencial_list->list[i] = sequencial_list->list[i+1];
     }
 }
 
-extern void add_start(SEQUENCIAL_LIST *sequencial_list, int data)
+extern bool add_start(SEQUENCIAL_LIST *sequencial_list, int data)
 {
     if(sequencial_list->size == MAX_SIZE)
     {
-        perror("The Sequencial List is FULL.\n");
-        return;
+        return false;
     }
     if(sequencial_list->size == 0)
     {
         sequencial_list->list[0] = data;
     }
 
-    int range = sequencial_list->end;
-    shift_right(sequencial_list, range);
+    int end = sequencial_list->end;
+    shift_right(sequencial_list, 0, end);
 
     sequencial_list->list[0] = data;
 
     sequencial_list->end++;
     sequencial_list->size++;
 
-    printf("Item added with success!\n");
+    return true;
 }
-extern void add_end(SEQUENCIAL_LIST *sequencial_list, int data)
+extern bool add_end(SEQUENCIAL_LIST *sequencial_list, int data)
 {
     if(sequencial_list->size == MAX_SIZE)
     {
-        perror("The Sequencial List is FULL.\n");
-        return;
+        return false;
     }
 
     int pos = sequencial_list->end;
@@ -83,26 +82,35 @@ extern void add_end(SEQUENCIAL_LIST *sequencial_list, int data)
     sequencial_list->end++;
     sequencial_list->size++;
 
-    printf("Item added with success!\n");
+    return true;
 }
 
-extern void remove_start(SEQUENCIAL_LIST *sequencial_list)
+extern bool remove_start(SEQUENCIAL_LIST *sequencial_list)
 {
-    int range = sequencial_list->end;
-    shift_left(sequencial_list, range);
+    if(sequencial_list->size == 0)
+    {
+        return false;
+    }
+
+    int end = sequencial_list->end;
+    shift_left(sequencial_list, 0, end);
 
     sequencial_list->end--;
     sequencial_list->size--;
 
-    printf("Item deleted with success!\n");
+    return true;
 }
-extern void remove_end(SEQUENCIAL_LIST *sequencial_list)
+extern bool remove_end(SEQUENCIAL_LIST *sequencial_list)
 {
-    int pos = sequencial_list->end;
+    if(sequencial_list->size == 0)
+    {
+        return false;
+    }
 
+    int pos = sequencial_list->end;
     sequencial_list->list[pos] = 0;
     sequencial_list->end--;
     sequencial_list->size--;
 
-    printf("Item deleted with success!\n");
+    return true;
 }

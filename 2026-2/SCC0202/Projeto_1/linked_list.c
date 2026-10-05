@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
 #include "item.h"
 #include "linked_list.h"
@@ -25,61 +26,74 @@ extern LINKED_LIST *create_linked_list(void)
     linked_list->tail = NULL;
     linked_list->size = 0;
 
-    printf("Linked List created with success!\n");
     return linked_list;
 }
 
-extern void add_start(LINKED_LIST *linked_list, int data)
+extern bool add_start(LINKED_LIST *linked_list, int data)
 {
+    ITEM *new_item = create_item(data);
+    if(new_item == NULL)
+    {
+        return false;
+    }
     if(linked_list->head == NULL)
     {
-        linked_list->head = create_item(data);
+        linked_list->head = new_item;
         linked_list->tail = linked_list->head;
         linked_list->size++;
-        return;
     }
 
     ITEM *temp = linked_list->head;
 
-    linked_list->head = create_item(data);
-    set_next(linked_list->head, temp);
+    linked_list->head = new_item;
+    set_next(new_item, temp);
     linked_list->size++;
-    printf("Item added with success!\n");
+
+    return true;
 }
-extern void add_end(LINKED_LIST *linked_list, int data)
+extern bool add_end(LINKED_LIST *linked_list, int data)
 {
+    ITEM *new_item = create_item(data);
+    if(new_item == NULL)
+    {
+        return false;
+    }
     if(linked_list->tail == NULL)
     {
-        linked_list->head = create_item(data);
+        linked_list->head = new_item;
         linked_list->tail = linked_list->head;
         linked_list->size++;
-        return;
+        return true;
     }
 
-    ITEM *temp = create_item(data);
-
-    set_previus(temp, linked_list->tail);
-    linked_list->tail = temp;
+    set_previus(new_item, linked_list->tail);
+    linked_list->tail = new_item;
     linked_list->size++;
-    printf("Item added with success!\n");
+
+    return true;
 }
 
-extern void remove_start(LINKED_LIST *linked_list)
+extern bool remove_start(LINKED_LIST *linked_list)
 {
     ITEM *temp = linked_list->head;
+    if(temp == NULL)
+    {
+        return false;
+    }
     linked_list->head = get_next(temp);
 
     delete_item(temp);
     linked_list->size++;
-    printf("Item deleted with success!\n");
+
+    return true;
 }
-extern void remove_search(LINKED_LIST *linked_list, int key)
+extern bool remove_search(LINKED_LIST *linked_list, int key)
 {
     ITEM *temp = search(*linked_list, key);
 
     if(temp == NULL)
     {
-        printf("Item not found!\n");
+        return false;
     }
 
     ITEM *aux_previus = get_previus(temp);
@@ -88,16 +102,22 @@ extern void remove_search(LINKED_LIST *linked_list, int key)
     set_next(aux_previus, aux_next);
     delete_item(temp);
     linked_list->size--;
-    printf("Item deleted with success!\n");
+
+    return true;
 }
-extern void remove_end(LINKED_LIST *linked_list)
+extern bool remove_end(LINKED_LIST *linked_list)
 {
     ITEM *temp = linked_list->tail;
+    if(temp == NULL)
+    {
+        return false;
+    }
     linked_list->tail = get_previus(temp);
 
     delete_item(temp);
     linked_list->size--;
-    printf("Item deleted with success!\n");
+
+    return true;
 }
 
 static ITEM *search(LINKED_LIST linked_list, int key)
