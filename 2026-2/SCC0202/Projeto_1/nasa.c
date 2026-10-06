@@ -1,23 +1,21 @@
-IDEIAS:
-
-Union estruturas de dados
-{
-    struct lista_encadeada
-    {
-        //Funções da lista_encadeada
-    }
-    struct lista_sequencial
-    {
-        //Funções da lista_sequencial
-    }
-    .......
-}
-
 #include <stdbool.h>
-#include <math.h>   // NAN, isnan
 
-Perguntei pro Claude e ele fez os tipos de dados de da campo.
+typedef enum threat_category {
+    THREAT_SAFE,
+    THREAT_MONITOR,
+    THREAT_CONCERN,
+    THREAT_OH_NO
+} THREAT_CATEGORY;
 
+typedef struct sentry_info
+{
+    double sentry_impact_prob;
+    double sentry_torino_scale;
+    double sentry_palermo_scale;
+    double sentry_diameter_km;
+} SENTRY_INFO;
+
+//days_until_approach: is_past_event é True quando os dias são negativos.
 typedef struct asteroid {
     char   asteroid_designation[16];   // ex.: "2020 AY1" (máx. 10 caracteres)
     char   asteroid_fullname[48];      // ex.: "(2020 AY1)" (máx. 34)
@@ -32,11 +30,8 @@ typedef struct asteroid {
     bool   is_future_event;
     double risk_score;                 // 0.0018 a 0.876
     int    panic_level;                // 0 a 9
-    char   threat_category[16];        // SAFE, MONITOR, CONCERN, OH_NO
+    THREAT_CATEGORY threat_category;
     char   panic_verdict[48];          // frase de até 34 caracteres
     bool   on_sentry_list;
-    double sentry_impact_prob;         // 1e-10 a 0.10 (vazio fora da Sentry)
-    double sentry_torino_scale;        // no dataset só aparece 0.0
-    double sentry_palermo_scale;       // negativo, -12.14 a -0.92
-    double sentry_diameter_km;         // 0.001 a 1.3
+    SENTRY_INFO *sentry_info;
 } ASTEROID;
