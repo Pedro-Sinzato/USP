@@ -1,4 +1,8 @@
+#include <stdio.h>
+#include <stdlib.h>
 #include <stdbool.h>
+
+//Incluir estruturas_dados.h
 
 typedef enum threat_category {
     THREAT_SAFE,
@@ -35,3 +39,61 @@ typedef struct asteroid {
     bool   on_sentry_list;
     SENTRY_INFO *sentry_info;
 } ASTEROID;
+
+ASTEROID *create_asteroid(void)
+{
+    ASTEROID *asteroide = calloc(1, sizeof(ASTEROID));
+    if(asteroide == NULL)
+    {
+        return NULL;
+    }
+
+    return asteroide;
+}
+
+SENTRY_INFO *create_sentry_info(void)
+{
+    SENTRY_INFO *sentry_info = calloc(1, sizeof(SENTRY_INFO));
+    if(sentry_info == NULL)
+    {
+        return NULL;
+    }
+
+    return sentry_info;
+}
+bool delete_sentry_info(SENTRY_INFO **sentry_info)
+{
+    if(sentry_info == NULL)
+    {
+        return false;
+    }
+
+    free(sentry_info);
+    sentry_info = NULL;
+
+    return true;
+}
+
+bool read_database(char database_name[])
+{
+    FILE *database = fopen(database_name, "r");
+    if(database == NULL)
+    {
+        return false;
+    }
+
+    //lê as linhas e faz o assingment para cada campo do ASTEROID e faz esse loop:
+    ASTEROID *asteroid = create_asteroid();
+    if(asteroid == NULL)
+    {
+        return false;
+    }
+    //Assingment de cada campo.
+    //Adiciona o ASTEROID a estruturada de dados
+    //Fim do loop. Da para encapsular isso em uma função que receber char linha[] e separa os dados.
+
+    fclose(database);
+    database = NULL;
+
+    return true;
+}
