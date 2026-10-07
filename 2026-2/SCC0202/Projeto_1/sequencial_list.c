@@ -69,6 +69,27 @@ extern bool add_start(SEQUENCIAL_LIST *sequencial_list, int data)
 
     return true;
 }
+extern bool add_ordering(SEQUENCIAL_LIST *sequencial_list, int data)
+{
+    if(sequencial_list->size == MAX_SIZE)
+    {
+        return false;
+    }
+    if(sequencial_list->size == 0)
+    {
+        sequencial_list->list[0] = data;
+    }
+
+    int pos = insert_pos(sequencial_list, data);
+
+    shift_right(sequencial_list, pos, sequencial_list->end);
+    sequencial_list->list[pos] = data;
+
+    sequencial_list->end++;
+    sequencial_list->size++;
+
+    return true;
+}
 extern bool add_end(SEQUENCIAL_LIST *sequencial_list, int data)
 {
     if(sequencial_list->size == MAX_SIZE)
@@ -113,4 +134,50 @@ extern bool remove_end(SEQUENCIAL_LIST *sequencial_list)
     sequencial_list->size--;
 
     return true;
+}
+
+extern int binary_search(SEQUENCIAL_LIST *sequencial_list, int target) {
+    int left = 0;
+    int right = sequencial_list->end;
+
+    int *list = sequencial_list->list;
+
+    while (left <= right)
+    {
+        int middle = left + (right - left) / 2;
+        if (list[middle] == target)
+        {
+            return middle;
+        }
+        if (list[middle] < target)
+        {
+            left = middle + 1;
+        }
+        else
+        {
+            right = middle - 1;
+        }
+    }
+    return -1;
+}
+static int insert_pos(SEQUENCIAL_LIST *sequencial_list, int data)
+{
+    int start = 0;
+    int end = sequencial_list->end;
+    int *list = sequencial_list->list;
+
+    while (start <= end)
+    {
+        int middle = start + (end - start) / 2;
+
+        if (list[middle] < data)
+        {
+            start = middle + 1;
+        }
+        else
+        {
+            end = middle - 1;
+        }
+    }
+    return start;
 }

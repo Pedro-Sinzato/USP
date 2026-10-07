@@ -39,6 +39,13 @@ static void shift_left(SEQUENCIAL_LIST *sequencial_list, int start, int end);
  */
 extern bool add_start(SEQUENCIAL_LIST *sequencial_list, int data);
 /**
+ * @brief Adicona um ITEM de forma ordenada em SEQUENCIAL_LIST.
+ * @param[out] Ponteiro  para a SEQUENCIAL_LIST.
+ * @param[in] Data de ITEM.
+ * @return TRUE se conseguir e FALSE se não conseguir.
+ */
+extern bool add_ordering(SEQUENCIAL_LIST *sequencial_list, int data);
+/**
  * @brief Adicona um ITEM no final de SEQUENCIAL_LIST.
  * @param[out] Ponteiro  para a SEQUENCIAL_LIST.
  * @param[in] Data de ITEM.
@@ -58,4 +65,19 @@ extern bool remove_start(SEQUENCIAL_LIST *sequencial_list);
  * @return TRUE se conseguir e FALSE se não conseguir.
  */
 extern bool remove_end(SEQUENCIAL_LIST *sequencial_list);
+
+/**
+ * @brief Faz a busca binária de ITEM em SEQUENCIAL_LIST.
+ * @param[in] Ponteiro para a SEQUENCIAL_LIST.
+ * @param[in] Alvo da busca.
+ * @return TRUE se encontrar e FALSE se não encontrar.
+ */
+extern int binary_search(SEQUENCIAL_LIST *sequencial_list, int target);
+/**
+ * @brief Faz a busca binária de ITEM em SEQUENCIAL_LIST para a posição à inserir ITEM.
+ * @param[in] Ponteiro para a SEQUENCIAL_LIST.
+ * @param[in] Data de ITEM.
+ * @return Posição da inserção.
+ */
+static int insert_pos(SEQUENCIAL_LIST *sequencial_list, int data);
 #endif
