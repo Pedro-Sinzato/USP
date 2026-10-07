@@ -1,20 +1,4 @@
-IDEIAS:
-
-Union estruturas de dados
-{
-    struct lista_encadeada
-    {
-        //Funções da lista_encadeada
-    }
-    struct lista_sequencial
-    {
-        //Funções da lista_sequencial
-    }
-    .......
-}
-
-#include <stdbool.h>
-#include <math.h>   // NAN, isnan
+RELATÓRIO PROJETO:
 
 Perguntei pro Claude e ele fez os tipos de dados de da campo.
 
