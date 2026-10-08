@@ -13,8 +13,9 @@ extern SEQUENCIAL_LIST *create_sequencial_list(void);
 /**
  * @brief Apaga SEQUENCIAL_LIST.
  * @param[out] Ponteiro duplo para a SEQUENCIAL_LIST.
+ * @return TRUE se conseguir e FALSE se não conseguir.
  */
-extern void delete_sequencial_list(SEQUENCIAL_LIST **sequencial_list);
+extern bool delete_sequencial_list(SEQUENCIAL_LIST **sequencial_list);
 
 /**
  * @brief Desloca elementos de SEQUENCIAL_LIST paraa DIREITA dado um RANGE[START-END].
@@ -37,7 +38,7 @@ static void shift_left(SEQUENCIAL_LIST *sequencial_list, int start, int end);
  * @param[in] Data de ITEM.
  * @return TRUE se conseguir e FALSE se não conseguir.
  */
-extern bool add_start(SEQUENCIAL_LIST *sequencial_list, int data);
+extern bool sl_add_start(SEQUENCIAL_LIST *sequencial_list, int data);
 /**
  * @brief Adicona um ITEM de forma ordenada em SEQUENCIAL_LIST.
  * @param[out] Ponteiro  para a SEQUENCIAL_LIST.
@@ -51,20 +52,20 @@ extern bool add_ordering(SEQUENCIAL_LIST *sequencial_list, int data);
  * @param[in] Data de ITEM.
  * @return TRUE se conseguir e FALSE se não conseguir.
  */
-extern bool add_end(SEQUENCIAL_LIST *sequencial_list, int data);
+extern bool sl_add_end(SEQUENCIAL_LIST *sequencial_list, int data);
 
 /**
  * @brief Remove ITEM no começo de SEQUENCIAL_LIST.
  * @param[out] Ponteiro  para a SEQUENCIAL_LIST.
  * @return TRUE se conseguir e FALSE se não conseguir.
  */
-extern bool remove_start(SEQUENCIAL_LIST *sequencial_list);
+extern bool sl_remove_start(SEQUENCIAL_LIST *sequencial_list);
 /**
  * @brief Remove ITEM no começo de SEQUENCIAL_LIST.
  * @param[out] Ponteiro  para a SEQUENCIAL_LIST.
  * @return TRUE se conseguir e FALSE se não conseguir.
  */
-extern bool remove_end(SEQUENCIAL_LIST *sequencial_list);
+extern bool sl_remove_end(SEQUENCIAL_LIST *sequencial_list);
 
 /**
  * @brief Faz a busca binária de ITEM em SEQUENCIAL_LIST.
@@ -72,7 +73,7 @@ extern bool remove_end(SEQUENCIAL_LIST *sequencial_list);
  * @param[in] Alvo da busca.
  * @return TRUE se encontrar e FALSE se não encontrar.
  */
-extern int binary_search(SEQUENCIAL_LIST *sequencial_list, int target);
+extern bool binary_search(SEQUENCIAL_LIST *sequencial_list, int target);
 /**
  * @brief Faz a busca binária de ITEM em SEQUENCIAL_LIST para a posição à inserir ITEM.
  * @param[in] Ponteiro para a SEQUENCIAL_LIST.

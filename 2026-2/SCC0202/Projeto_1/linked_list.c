@@ -28,6 +28,26 @@ extern LINKED_LIST *create_linked_list(void)
 
     return linked_list;
 }
+extern bool delete_linked_list(LINKED_LIST **linked_list)
+{
+    if(linked_list == NULL || *linked_list == NULL)
+    {
+        return false;
+    }
+
+    LINKED_LIST *list = *linked_list;
+
+    while(list->head != NULL)
+    {
+        ITEM *temp = get_next(list->head);
+        free(list->head);
+        list->head = temp;
+    }
+
+    free(list);
+    *linked_list = NULL;
+    return true;
+}
 
 extern bool add_start(LINKED_LIST *linked_list, int data)
 {

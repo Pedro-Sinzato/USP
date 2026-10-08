@@ -9,7 +9,13 @@ typedef struct linked_list LINKED_LIST;
  * @brief Cria LINKED_LIST
  * @return Ponteiro para a LINKED_LIST.
  */
-LINKED_LIST *create_linked_list(void);
+extern LINKED_LIST *create_linked_list(void);
+/**
+ * @brief Deleta LINKED_LIST
+ * @param[out] Ponteiro duplo para LINKED_LIST
+ * @return TRUE se conseguir e FALSE se não conseguir.
+ */
+extern bool delete_linked_list(LINKED_LIST **linked_list);
 
 /**
  * @brief Adicona um ITEM no começo de LINKED_LIST.

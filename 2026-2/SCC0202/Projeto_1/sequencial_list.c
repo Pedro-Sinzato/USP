@@ -1,3 +1,5 @@
+#include <cmath>
+#include <cstddef>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -27,10 +29,16 @@ extern SEQUENCIAL_LIST *create_sequencial_list(void)
     printf("Sequencial List created with success!\n");
     return sequencial_list;
 }
-extern void delete_sequencial_list(SEQUENCIAL_LIST **sequencial_list)
+extern bool delete_sequencial_list(SEQUENCIAL_LIST **sequencial_list)
 {
+    if(sequencial_list == NULL || *sequencial_list == NULL)
+    {
+        return false;
+    }
+
     free(*sequencial_list);
-    sequencial_list = NULL;
+    *sequencial_list = NULL;
+    return true;
 }
 
 static void shift_right(SEQUENCIAL_LIST *sequencial_list, int start, int end)
@@ -48,7 +56,7 @@ static void shift_left(SEQUENCIAL_LIST *sequencial_list, int start, int end)
     }
 }
 
-extern bool add_start(SEQUENCIAL_LIST *sequencial_list, int data)
+extern bool sl_add_start(SEQUENCIAL_LIST *sequencial_list, int data)
 {
     if(sequencial_list->size == MAX_SIZE)
     {
@@ -121,7 +129,36 @@ extern bool remove_start(SEQUENCIAL_LIST *sequencial_list)
 
     return true;
 }
-extern bool remove_end(SEQUENCIAL_LIST *sequencial_list)
+extern bool sl_add_end(SEQUENCIAL_LIST *sequencial_list, int data)
+{
+    if(sequencial_list->size == 0)
+    {
+        return false;
+    }
+
+    int pos = sequencial_list->end;
+    sequencial_list->list[pos] = data;
+    sequencial_list->end++;
+    sequencial_list->size++;
+
+    return true;
+}
+
+extern bool sl_remove_start(SEQUENCIAL_LIST *sequencial_list)
+{
+    if(sequencial_list->size == 0)
+    {
+        return false;
+    }
+
+    int end = sequencial_list->end;
+    shift_left(sequencial_list, 0, end);
+    sequencial_list->end--;
+    sequencial_list->size--;
+
+    return true;
+}
+extern bool sl_remove_end(SEQUENCIAL_LIST *sequencial_list)
 {
     if(sequencial_list->size == 0)
     {
@@ -136,7 +173,7 @@ extern bool remove_end(SEQUENCIAL_LIST *sequencial_list)
     return true;
 }
 
-extern int binary_search(SEQUENCIAL_LIST *sequencial_list, int target) {
+extern bool binary_search(SEQUENCIAL_LIST *sequencial_list, int target) {
     int left = 0;
     int right = sequencial_list->end;
 
@@ -147,7 +184,7 @@ extern int binary_search(SEQUENCIAL_LIST *sequencial_list, int target) {
         int middle = left + (right - left) / 2;
         if (list[middle] == target)
         {
-            return middle;
+            return true;
         }
         if (list[middle] < target)
         {
@@ -158,7 +195,7 @@ extern int binary_search(SEQUENCIAL_LIST *sequencial_list, int target) {
             right = middle - 1;
         }
     }
-    return -1;
+    return false;
 }
 static int insert_pos(SEQUENCIAL_LIST *sequencial_list, int data)
 {
