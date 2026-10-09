@@ -4,6 +4,9 @@
 
 //Incluir estruturas_dados.h
 
+
+
+
 typedef enum threat_category {
     THREAT_SAFE,
     THREAT_MONITOR,
