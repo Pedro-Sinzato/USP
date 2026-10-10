@@ -1,11 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
-
+#include "nasa.h"
 //Incluir estruturas_dados.h
-
-
-
 
 typedef enum threat_category {
     THREAT_SAFE,
@@ -23,7 +20,8 @@ typedef struct sentry_info
 } SENTRY_INFO;
 
 //days_until_approach: is_past_event é True quando os dias são negativos.
-typedef struct asteroid {
+struct asteroid
+{
     char   asteroid_designation[16];   // ex.: "2020 AY1" (máx. 10 caracteres)
     char   asteroid_fullname[48];      // ex.: "(2020 AY1)" (máx. 34)
     char   close_approach_date[20];    // "2020-01-01 00:54:00" (19 + '\0')
@@ -41,9 +39,9 @@ typedef struct asteroid {
     char   panic_verdict[48];          // frase de até 34 caracteres
     bool   on_sentry_list;
     SENTRY_INFO *sentry_info;
-} ASTEROID;
+};
 
-ASTEROID *create_asteroid(void)
+extern ASTEROID *create_asteroid(void)
 {
     ASTEROID *asteroide = calloc(1, sizeof(ASTEROID));
     if(asteroide == NULL)
@@ -77,7 +75,7 @@ bool delete_sentry_info(SENTRY_INFO **sentry_info)
     return true;
 }
 
-bool read_database(char database_name[])
+extern bool read_database(char database_name[])
 {
     FILE *database = fopen(database_name, "r");
     if(database == NULL)

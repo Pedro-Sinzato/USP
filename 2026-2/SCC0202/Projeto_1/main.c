@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #define ARG_MAX_LEN 32
 
+//Funcionando!!!
 typedef struct arguments
 {
     char reader[ARG_MAX_LEN];
@@ -73,7 +74,6 @@ int main(int argc, char *argv[])
     return EXIT_SUCCESS;
 }
 
-//Funcionando!!!
 //-reader(1) nome(2) -input(3) nome(4)... -limit(15) value(16)
 
 /*
