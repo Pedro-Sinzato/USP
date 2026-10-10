@@ -2,6 +2,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
+#include <errno.h>
 #include <math.h>
 
 #include "query.h"
@@ -36,6 +37,22 @@ struct query
     int n_sims;
 };
 
+//Usado para testar
+static const char *string_campo[] = {
+    [F_YEAR]                 = "year",
+    [F_DISTANCE_AU]          = "distance_au",
+    [F_VELOCITY_KM_S]        = "velocity_km_s",
+    [F_RISK_SCORE]           = "risk_score",
+    [F_IS_FUTURE]            = "is_future_event",
+    [F_THREAT_CATEGORY]      = "threat_category",
+    [F_ON_SENTRY]            = "on_sentry_list",
+    [F_SENTRY_IMPACT_PROP]   = "sentry_impact_prob",
+    [F_SENTRY_TORINO_SCALE]  = "sentry_torino_scale",
+    [F_SENTRY_PALERMO_SCALE] = "sentry_palermo_scale",
+    [F_SENTRY_DIAMETER_KM]   = "sentry_diameter_km",
+    [F_INVALID]              = "invalid"
+};
+
 static CAMPO parse_campo(const char *campo)
 {
     if (!strcmp(campo, "year")) return F_YEAR;
@@ -62,15 +79,6 @@ static OPERADOR parse_operador(const char *operador)
     if (!strcmp(operador, ">=")) return OP_GE;
     return OP_INVALID;
 }
-
-// SIM compara números, então campos de texto não servem.
-static bool campo_numerico(CAMPO campo)
-{
-    return campo != F_INVALID && campo != F_THREAT_CATEGORY;
-}
-
-// ATENÇÃO: os nomes dos membros de ASTEROID abaixo são suposições.
-// Ajuste para a sua struct real.
 
 static QUERY *create_query(void)
 {
@@ -114,6 +122,7 @@ QUERY *query_reader(const char *query_name)
     FILE *query_file = fopen(query_name, "r");
     if (query_file == NULL)
     {
+        fprintf(stderr, "Erro: nao foi possivel abrir '%s': %s\n", query_name, strerror(errno));
         return NULL;
     }
 
@@ -148,10 +157,6 @@ QUERY *query_reader(const char *query_name)
             }
 
             CAMPO campo = parse_campo(s_campo);
-            if (!campo_numerico(campo))
-            {
-                continue; // campo inválido
-            }
             add_sim(query, campo,strtod(s_alvo, NULL),strtod(s_tol, NULL), strtod(s_peso, NULL));
         }
         // else if (!strcmp(tipo, "FILTER")) { ... }
@@ -160,6 +165,23 @@ QUERY *query_reader(const char *query_name)
     fclose(query_file);
 
     return query;
+}
+
+//Teste se a leitura funcionou
+void print_query(QUERY *query)
+{
+    int n_sims = query->n_sims;
+
+    printf("Numero de SIMS: %d\n", n_sims);
+
+    for(int i = 0; i < n_sims; i++)
+    {
+        int campo = query->sims[i].campo;
+        double alvo = query->sims[i].alvo;
+        double tolerancia = query->sims[i].tolerancia;
+        double peso = query->sims[i].peso;
+        printf("%s|%lf|%lf|%lf\n", string_campo[campo], alvo, tolerancia, peso);
+    }
 }
 
 //Ignorar daqui pra baixo por enquanto;
