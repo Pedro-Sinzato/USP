@@ -73,16 +73,3 @@ int main(int argc, char *argv[])
     arguments = NULL;
     return EXIT_SUCCESS;
 }
-
-//-reader(1) nome(2) -input(3) nome(4)... -limit(15) value(16)
-
-/*
- –reader leitor do dataset utilizado
- –input arquivo de entrada
- –base estrutura usada para armazenar o dataset completo
- –result estrutura usada para armazenar o resultado da busca
- –query arquivo contendo os critérios da busca
- –output arquivo que receberá os registros encontrados
- –top-k máximo de registros exportados; 0 significa todos
- –limit máximo de registros carregados; 0 significa toda a base
- */

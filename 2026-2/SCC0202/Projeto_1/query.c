@@ -117,6 +117,7 @@ static bool add_sim(QUERY *query, CAMPO campo, double alvo, double tolerancia, d
     return true;
 }
 
+//Funciona!!!
 QUERY *query_reader(const char *query_name)
 {
     FILE *query_file = fopen(query_name, "r");

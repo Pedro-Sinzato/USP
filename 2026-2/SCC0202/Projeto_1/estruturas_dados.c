@@ -1,6 +1,6 @@
 #include <stdbool.h>
-#include "linked_list.h"
-#include "sequencial_list.h"
+#include "estruturas_dados/linked_list.h"
+#include "estruturas_dados/sequencial_list.h"
 
 typedef struct fila
 {

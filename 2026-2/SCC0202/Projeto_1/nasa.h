@@ -1,7 +1,7 @@
 #ifndef NASA_H
 #define NASA_H
 
-/*!
+/**
  * \brief Estrutura para representar um ASTEROIDE.
  *  Guarda os campos de ASTEROIDE.
  */
