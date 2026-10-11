@@ -3,11 +3,6 @@
 
 typedef struct query QUERY;
 
-typedef enum operador
-{
-    OP_EQ, OP_NE, OP_LT, OP_LE, OP_GT, OP_GE, OP_INVALID
-}OPERADOR;
-
 /**
  * @brief Faz o parsing do CAMPO
  * @param[in] String contendo o campo.
