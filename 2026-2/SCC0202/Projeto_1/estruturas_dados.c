@@ -1,65 +1,53 @@
+#include <stdlib.h>
 #include <stdbool.h>
 #include "estruturas_dados/linked_list.h"
 #include "estruturas_dados/sequencial_list.h"
 
-typedef struct fila
-{
-    LINKED_LIST (*create_linked_list)(void);
-    bool (*delete_linked_list)(LINKED_LIST **linked_list);
-    bool (*add_end)(LINKED_LIST *linked_list, int data);
-    bool (*remove_start)(LINKED_LIST *linked_list);
-    //Get First
-}FILA;
+//Basicamento implementando C++ manualmente em C
+//Ver Vtable
 
-typedef struct pilha
+typedef enum estrutura_dados_types
 {
-    LINKED_LIST (*create_linked_list)(void);
-    bool (*delete_linked_list) (LINKED_LIST **linked_list);
-    bool (*add_start)(LINKED_LIST *linked_list, int data);
-    bool (*remove_start)(LINKED_LIST *linked_list);
-    //Get First
-}PILHA;
+    PILHA,
+    FILA,
+    LISTA_SEQ,
+    LISTA_ENC,
+    LISTA_CABECA,
+    LISTA_ORD,
+    LIST_GEN,
+    LISTA_CRUZ
+}ED_TYPES;
 
-typedef struct lista_sequencial
-{
-    SEQUENCIAL_LIST (*create_sequencial_list)(void);
-    bool (*delete_sequencial_list)(SEQUENCIAL_LIST **sequencial_list);
-    bool (*sl_add_start)(SEQUENCIAL_LIST *sequencial_list, int data);
-    bool (*st_add_end)(SEQUENCIAL_LIST *sequencial_list, int data);
-    bool (*sl_remove_start)(SEQUENCIAL_LIST *sequencial_list);
-    bool (*sl_remove_end)(SEQUENCIAL_LIST *sequencial_list);
-}LISTA_SEQUENCIAL;
+typedef struct ed_vtable ED_VTABLE;
+typedef struct estrutura_dados ED;
 
-typedef struct lista_encadeada
+//funções genêricas
+struct ed_vtable
 {
-    LINKED_LIST (*create_linked_list)(void);
-    bool (*delete_linked_list)(LINKED_LIST **linked_list);
-    bool (*add_start)(LINKED_LIST *linked_list, int data);
-    bool (*add_end)(LINKED_LIST *linked_list, int data);
-    bool (*remove_start)(LINKED_LIST *linked_list);
-    bool (*remove_end)(LINKED_LIST *linked_list);
-}LISTA_ENCADEADA;
+    void(*create_ed)(const ED *self);
+    void(*destroy_ed)(ED *self);
+};
+;
+struct estrutura_dados
+{
+    const ED_VTABLE *ed_vtable;
+    ED_TYPES ed_types;
+};
 
-typedef struct lista_ordenada
+void create_ed(const ED *self)
 {
-    SEQUENCIAL_LIST (*create_sequencial_list)(void);
-    bool (*delete_sequencial_list)(SEQUENCIAL_LIST **sequencial_list);
-    bool (*add_ordering)(SEQUENCIAL_LIST *sequencial_list, int data);
-    bool (*sl_remove_start)(SEQUENCIAL_LIST *sequencial_list);
-    bool (*sl_remove_end)(SEQUENCIAL_LIST *sequencial_list);
-    bool (*binary_search)(SEQUENCIAL_LIST *sequencial_list, int target);
-}LISTA_ORDENADA;
-
-typedef union estruras_dados
+    if(self == NULL)
+    {
+        return;
+    }
+    self->ed_vtable->create_ed(self);
+}
+void destroy_ed(ED **self)
 {
-    FILA fila;
-    PILHA pilha;
-    LISTA_SEQUENCIAL lista_sequencial;
-    LISTA_ENCADEADA lista_encadeada;
-    LISTA_ORDENADA lista_ordenada;
-}ESTRURAS_DADOS;
-//To safely select between structs, you must include a discriminator (often an int or enum) outside
-// the union or as the first member of all contained structs to track which struct is currently active.
-// Accessing a member involves checking this discriminator first, then accessing
-// the corresponding struct field, as writing to one member overwrites the others due to shared memory.
-// Realmente, vamos ter que mudar essa ideia.
+    if(self == NULL || *self == NULL)
+    {
+        return;
+    }
+    (*self)->ed_vtable->destroy_ed(*self);
+    *self = NULL;
+}

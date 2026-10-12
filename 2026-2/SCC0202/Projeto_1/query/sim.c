@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdbool.h>
 #include <math.h>
 
 #include "sim.h"
@@ -26,6 +27,18 @@ extern SIM *create_sim(CAMPO campo, double alvo, double tolerancia, double peso)
     sim->peso = peso;
 
     return sim;
+}
+extern bool delete_sim(SIM **sim)
+{
+    if(sim == NULL || *sim == NULL)
+    {
+        return false;
+    }
+
+    free(*sim);
+    *sim = NULL;
+
+    return true;
 }
 
 extern double similarity(SIM *sim)
@@ -58,4 +71,21 @@ extern double total_similarity(SIM *sim[], int total_sim)
     double media_ponderada = total_similarity / total_peso;
 
     return media_ponderada;
+}
+
+extern CAMPO get_sim_campo(const SIM *sim)
+{
+    return (sim == NULL) ? F_INVALID : sim->campo;
+}
+extern double get_sim_alvo(const SIM *sim)
+{
+    return (sim == NULL) ? NAN : sim->alvo;
+}
+extern double get_sim_tolerancia(const SIM *sim)
+{
+    return (sim == NULL) ? NAN : sim->tolerancia;
+}
+extern double get_sim_peso(const SIM *sim)
+{
+    return (sim == NULL) ? NAN : sim->peso;
 }

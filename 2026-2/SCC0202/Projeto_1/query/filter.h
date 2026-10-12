@@ -30,4 +30,6 @@ typedef struct filter FILTER;
  */
 extern FILTER *create_filter(CAMPO campo, char operador[3], CONDICAO condicao);
 
+
+extern OPERADOR parse_operador(const char *operador);
 #endif

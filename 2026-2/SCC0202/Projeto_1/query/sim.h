@@ -21,7 +21,7 @@ typedef struct sim SIM;
  * @return Ponteiro para o SIM criado, se não conseguir, Ponteiro para NULL.
  */
 extern SIM *create_sim(CAMPO campo, double alvo, double tolerancia, double peso);
-
+extern bool delete_sim(SIM **sim);
 /**
  * @brief Calcula a SIMILARIDADE de um SIM.
  * @param[in] Ponteiro para SIM.
@@ -34,5 +34,10 @@ extern double similarity(SIM *sim);
  * @return TRUE se conseguir e FALSE se não conseguir.
  */
 extern double total_similarity(SIM *sim[], int total_sim);
+
+extern CAMPO get_sim_campo(const SIM *sim);
+extern double get_sim_alvo(const SIM *sim);
+extern double get_sim_tolerancia(const SIM *sim);
+extern double get_sim_peso(const SIM *sim);
 
 #endif

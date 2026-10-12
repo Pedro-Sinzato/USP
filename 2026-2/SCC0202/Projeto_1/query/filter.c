@@ -32,7 +32,7 @@ extern FILTER *create_filter(CAMPO campo, char operador[3], CONDICAO condicao)
     return filter;
 }
 
-static OPERADOR parse_operador(const char *operador)
+extern OPERADOR parse_operador(const char *operador)
 {
     if (!strcmp(operador, "==")) return OP_EQ;
     if (!strcmp(operador, "!=")) return OP_NE;
