@@ -1,7 +1,7 @@
 #ifndef SIM_H
 #define SIM_H
 
-#include "campo.h"
+#include "../nasa.h"
 
 /**
  * @brief Estrutura do SIM.

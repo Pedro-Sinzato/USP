@@ -3,7 +3,7 @@
 #include <math.h>
 
 #include "sim.h"
-#include "campo.h"
+#include "../nasa.h"
 
 struct sim
 {

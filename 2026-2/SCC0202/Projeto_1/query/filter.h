@@ -1,7 +1,7 @@
 #ifndef FILTER_H
 #define FILTER_H
 
-#include "campo.h"
+#include "../nasa.h"
 /**
  * @brief ENUM com os OPERADORES possíveis: ==, >=, <=, !=
  */

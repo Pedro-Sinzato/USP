@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include "string.h"
+
 #include "nasa.h"
 //Incluir estruturas_dados.h
 
@@ -18,6 +20,26 @@ typedef struct sentry_info
     double sentry_palermo_scale;
     double sentry_diameter_km;
 } SENTRY_INFO;
+
+static const char *nomes[] =
+{
+    [F_YEAR] = "year",
+    [F_MONTH] = "month",
+    [F_DISTANCE_AU] = "distance_au",
+    [F_VELOCITY_KM_S] = "velocity_km_s",
+    [F_ABS_MAG] = "absolute_magnitude",
+    [F_DAYS_UNTIL] = "days_until_approach",
+    [F_IS_PAST] = "is_past_event",
+    [F_IS_FUTURE] = "is_future_event",
+    [F_RISK_SCORE] = "risk_score",
+    [F_PANIC_LEVEL] = "panic_level",
+    [F_THREAT_CATEGORY] = "threat_category",
+    [F_ON_SENTRY] = "on_sentry_list",
+    [F_SENTRY_IMPACT_PROP] = "sentry_impact_prob",
+    [F_SENTRY_TORINO_SCALE] = "sentry_torino_scale",
+    [F_SENTRY_PALERMO_SCALE] = "sentry_palermo_scale",
+    [F_SENTRY_DIAMETER_KM] = "sentry_diameter_km"
+};
 
 //days_until_approach: is_past_event é True quando os dias são negativos.
 struct asteroid
@@ -97,4 +119,21 @@ extern bool read_database(char database_name[])
     database = NULL;
 
     return true;
+}
+
+extern CAMPO parse_campo(const char *campo)
+{
+    for (int i = 0; i < F_INVALID; i++)
+    {
+        if (strcmp(campo, nomes[i]) == 0)
+        {
+            return (CAMPO)i;
+        }
+    }
+    return F_INVALID;
+}
+
+extern const char *campo_nome(CAMPO campo)
+{
+    return (campo < 0 || campo >= F_INVALID) ? "invalid" : nomes[campo];
 }

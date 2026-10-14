@@ -2,7 +2,7 @@
 #define QUERY_H
 
 #include <stdbool.h>
-#include "campo.h"
+#include "../nasa.h"
 
 typedef struct query QUERY;
 

@@ -7,7 +7,7 @@
 #include "query.h"
 #include "sim.h"
 #include "filter.h"
-#include "campo.h"
+#include "../nasa.h"
 
 // FILTER: condição obrigatória para o registro ser aceito.
 // SIM: critério numérico de similaridade, no formato campo|alvo|tolerancia|peso;
@@ -42,27 +42,6 @@ struct query
     bool  order_by_sim;   // true: ORDER|similarity|...; false: usa order_campo
     CAMPO order_campo;
     ORDEM order_dir;
-};
-
-//Usado para testar
-static const char *string_campo[] = {
-    [F_YEAR]                 = "year",
-    [F_DISTANCE_AU]          = "distance_au",
-    [F_VELOCITY_KM_S]        = "velocity_km_s",
-    [F_RISK_SCORE]           = "risk_score",
-    [F_IS_FUTURE]            = "is_future_event",
-    [F_THREAT_CATEGORY]      = "threat_category",
-    [F_ON_SENTRY]            = "on_sentry_list",
-    [F_SENTRY_IMPACT_PROP]   = "sentry_impact_prob",
-    [F_SENTRY_TORINO_SCALE]  = "sentry_torino_scale",
-    [F_SENTRY_PALERMO_SCALE] = "sentry_palermo_scale",
-    [F_SENTRY_DIAMETER_KM]   = "sentry_diameter_km",
-    [F_INVALID]              = "invalid",
-    [F_MONTH]                = "month",
-    [F_ABS_MAG]              = "absolute_magnitude",
-    [F_DAYS_UNTIL]           = "days_until_approach",
-    [F_IS_PAST]              = "is_past_event",
-    [F_PANIC_LEVEL]          = "panic_level"
 };
 
 static QUERY *create_query(void)
@@ -245,7 +224,7 @@ void print_query(const QUERY *query)
     for (int i = 0; i < query->n_sims; i++)
     {
         const SIM *s = query->sims[i];
-        printf("%s|%lf|%lf|%lf\n", string_campo[get_sim_campo(s)],get_sim_alvo(s), get_sim_tolerancia(s), get_sim_peso(s));
+        printf("%s|%lf|%lf|%lf\n", campo_nome(get_sim_campo(s)),get_sim_alvo(s), get_sim_tolerancia(s), get_sim_peso(s));
     }
     if (query->has_accept)
     {
@@ -253,20 +232,20 @@ void print_query(const QUERY *query)
     }
     if (query->has_cross)
     {
-        printf("CROSS: %s|%s\n", string_campo[query->cross[0]],string_campo[query->cross[1]]);
+        printf("CROSS: %s|%s\n", campo_nome(query->cross[0]),campo_nome(query->cross[1]));
     }
     if(query->n_group > 0)
     {
         printf("GROUP:");
         for (int i = 0; i < query->n_group; i++)
         {
-            printf(" %s", string_campo[query->group[i]]);
+            printf(" %s", campo_nome(query->group[i]));
         }
         printf("\n");
     }
     if (query->has_order)
     {
-        printf("ORDER: %s %s\n",query->order_by_sim ? "similarity" : string_campo[query->order_campo],query->order_dir == ORDEM_ASC ? "ASC" : "DESC");
+        printf("ORDER: %s %s\n",query->order_by_sim ? "similarity" : campo_nome(query->order_campo),query->order_dir == ORDEM_ASC ? "ASC" : "DESC");
     }
 }
 /* ACCEPT */
