@@ -1,46 +1,18 @@
 #include <stdlib.h>
 #include <stdbool.h>
-#include "estruturas_dados/linked_list.h"
-#include "estruturas_dados/sequencial_list.h"
+
+#include "estruturas_dados.h"
+#include "estruturas_dados/stack/stack.h"
 
 //Basicamento implementando C++ manualmente em C
 //Ver Vtable
 
-typedef enum estrutura_dados_types
+ED *create_ed(ED_TYPES type)
 {
-    PILHA,
-    FILA,
-    LISTA_SEQ,
-    LISTA_ENC,
-    LISTA_CABECA,
-    LISTA_ORD,
-    LIST_GEN,
-    LISTA_CRUZ
-}ED_TYPES;
-
-typedef struct ed_vtable ED_VTABLE;
-typedef struct estrutura_dados ED;
-
-//funções genêricas
-struct ed_vtable
-{
-    void(*create_ed)(const ED *self);
-    void(*destroy_ed)(ED *self);
-};
-;
-struct estrutura_dados
-{
-    const ED_VTABLE *ed_vtable;
-    ED_TYPES ed_types;
-};
-
-void create_ed(const ED *self)
-{
-    if(self == NULL)
-    {
-        return;
+    switch (type) {
+        case PILHA: return (ED *)create_stack();
+        default:    return NULL;
     }
-    self->ed_vtable->create_ed(self);
 }
 void destroy_ed(ED **self)
 {
@@ -48,6 +20,6 @@ void destroy_ed(ED **self)
     {
         return;
     }
-    (*self)->ed_vtable->destroy_ed(*self);
+    (*self)->ed_vtable->destroy_ed(self);
     *self = NULL;
 }

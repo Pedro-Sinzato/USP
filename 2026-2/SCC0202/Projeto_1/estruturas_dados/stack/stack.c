@@ -3,6 +3,7 @@
 #include <stdlib.h>
 
 #include "stack.h"
+#include "item.h"
 
 typedef struct node
 {
@@ -12,20 +13,32 @@ typedef struct node
 
 struct stack
 {
+    ED base;
     NODE *top;
     int size;
 };
-
-extern STACK *create_stack(void)
+static bool stack_destroy(ED **self)
+{
+    STACK *stack = (STACK *)*self;
+    bool ok = delete_stack(&stack);
+    if (ok) *self = NULL;
+    return ok;
+}
+static const ED_VTABLE stack_vtable =
+{
+    .destroy_ed = stack_destroy,
+    .insert_ed = stack_insert
+};
+STACK *create_stack(void)
 {
     STACK *stack = calloc(1, sizeof(STACK));
-
-    if(stack == NULL)
+    if (stack == NULL)
     {
         return NULL;
     }
-    stack->top = NULL;
-    stack->size = 0;
+
+    stack->base.ed_vtable = &stack_vtable;
+    stack->base.ed_types  = PILHA;
 
     return stack;
 }
@@ -40,26 +53,29 @@ extern bool delete_stack(STACK **stack)
     while (atual != NULL)
     {
         NODE *anterior = atual->anterior;
-        item_apagar(&atual->item);
+        delete_item(&atual->item);
         free(atual);
         atual = anterior;
     }
 
     free(*stack);
     *stack = NULL;
+
+    return true;
 }
 
-ITEM *pilha_topo(PILHA *pilha) {
-    if (pilha == NULL || pilha_vazia(pilha)) {
+ITEM *pilha_topo(STACK *stack) {
+    if (stack == NULL || stack->size == 0)
+    {
         return NULL;
     }
 
-    return pilha->topo->item;
+    return stack->top->item;
 }
 
-extern bool stack_insert(STACK *stack, ITEM *item)
+extern bool stack_insert(STACK *stack)
 {
-    if (stack == NULL || item == NULL)
+    if (stack == NULL)
     {
         return false;
     }
@@ -70,7 +86,7 @@ extern bool stack_insert(STACK *stack, ITEM *item)
         return false;
     }
 
-    novo->item = item;
+    novo->item = create_item();
     novo->anterior = stack->top;
     stack->top = novo;
     stack->size++;

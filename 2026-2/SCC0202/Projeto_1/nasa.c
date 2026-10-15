@@ -4,21 +4,11 @@
 #include "string.h"
 
 #include "nasa.h"
+#include "item.h"
 //Incluir estruturas_dados.h
-
-typedef enum threat_category {
-    THREAT_SAFE,
-    THREAT_MONITOR,
-    THREAT_CONCERN,
-    THREAT_OH_NO
-} THREAT_CATEGORY;
 
 typedef struct sentry_info
 {
-    double sentry_impact_prob;
-    double sentry_torino_scale;
-    double sentry_palermo_scale;
-    double sentry_diameter_km;
 } SENTRY_INFO;
 
 static const char *nomes[] =
@@ -57,83 +47,11 @@ struct asteroid
     bool   is_future_event;
     double risk_score;                 // 0.0018 a 0.876
     int    panic_level;                // 0 a 9
-    THREAT_CATEGORY threat_category;
+    char threat_category[15];
     char   panic_verdict[48];          // frase de até 34 caracteres
     bool   on_sentry_list;
-    SENTRY_INFO *sentry_info;
+    double sentry_impact_prob;
+    double sentry_torino_scale;
+    double sentry_palermo_scale;
+    double sentry_diameter_km;
 };
-
-extern ASTEROID *create_asteroid(void)
-{
-    ASTEROID *asteroide = calloc(1, sizeof(ASTEROID));
-    if(asteroide == NULL)
-    {
-        return NULL;
-    }
-
-    return asteroide;
-}
-
-SENTRY_INFO *create_sentry_info(void)
-{
-    SENTRY_INFO *sentry_info = calloc(1, sizeof(SENTRY_INFO));
-    if(sentry_info == NULL)
-    {
-        return NULL;
-    }
-
-    return sentry_info;
-}
-bool delete_sentry_info(SENTRY_INFO **sentry_info)
-{
-    if(sentry_info == NULL)
-    {
-        return false;
-    }
-
-    free(sentry_info);
-    sentry_info = NULL;
-
-    return true;
-}
-
-extern bool read_database(char database_name[])
-{
-    FILE *database = fopen(database_name, "r");
-    if(database == NULL)
-    {
-        return false;
-    }
-
-    //lê as linhas e faz o assingment para cada campo do ASTEROID e faz esse loop:
-    ASTEROID *asteroid = create_asteroid();
-    if(asteroid == NULL)
-    {
-        return false;
-    }
-    //Assingment de cada campo.
-    //Adiciona o ASTEROID a estruturada de dados
-    //Fim do loop. Da para encapsular isso em uma função que receber char linha[] e separa os dados.
-
-    fclose(database);
-    database = NULL;
-
-    return true;
-}
-
-extern CAMPO parse_campo(const char *campo)
-{
-    for (int i = 0; i < F_INVALID; i++)
-    {
-        if (strcmp(campo, nomes[i]) == 0)
-        {
-            return (CAMPO)i;
-        }
-    }
-    return F_INVALID;
-}
-
-extern const char *campo_nome(CAMPO campo)
-{
-    return (campo < 0 || campo >= F_INVALID) ? "invalid" : nomes[campo];
-}
