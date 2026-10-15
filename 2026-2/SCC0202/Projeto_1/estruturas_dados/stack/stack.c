@@ -3,7 +3,7 @@
 #include <stdlib.h>
 
 #include "stack.h"
-#include "item.h"
+#include "../item.h"
 
 typedef struct node
 {

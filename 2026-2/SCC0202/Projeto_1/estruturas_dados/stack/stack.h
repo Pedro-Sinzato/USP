@@ -3,7 +3,7 @@
 
 #include <stdbool.h>
 
-#include "item.h"
+#include "../item.h"
 #include "../../estruturas_dados.h"
 
 typedef struct stack STACK;
