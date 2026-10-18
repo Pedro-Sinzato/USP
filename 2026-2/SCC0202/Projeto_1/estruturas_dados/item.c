@@ -1,72 +1,123 @@
-#include <stdio.h>
-#include <stdlib.h>
 #include <stdbool.h>
+#include <stdlib.h>
+#include <string.h>
 
 #include "item.h"
+
+typedef struct
+{
+    DATATYPE type;
+    union
+    {
+        int i;
+        double d;
+        char c;
+        char *s;
+        bool b;
+    } v;
+} FIELD;
 
 struct item
 {
     int n_fields;
-    void **fields;
+    FIELD *fields;
 };
 
-static bool data_selector(void *fields, DATATYPE type)
+extern ITEM *create_item(int n_fields, const DATATYPE types[])
 {
-    if(type == ITEM_INT)
+    if (n_fields <= 0 || types == NULL)
     {
-        fields = calloc(1, sizeof(int));
+        return NULL;
     }
-    else if(type == ITEM_DOUBLE)
+
+    ITEM *item = malloc(sizeof(ITEM));
+    if (item == NULL)
     {
-        fields = calloc(1, sizeof(double));
+        return NULL;
     }
-    else if(type == ITEM_CHAR)
+
+    item->fields = calloc(n_fields, sizeof(FIELD));
+    if (item->fields == NULL)
     {
-        fields = calloc(1, sizeof(char));
+        free(item);
+        return NULL;
     }
-    else if(type == ITEM_P_CHAR)
+
+    item->n_fields = n_fields;
+    for (int i = 0; i < n_fields; i++)
     {
-        fields = calloc(1, sizeof(char*));
+        item->fields[i].type = types[i];
     }
-    else if(type == ITEM_BOOL)
-    {
-        fields = calloc(1, sizeof(bool));
-    }
-    if(fields == NULL)
+
+    return item;
+}
+
+extern bool item_set(ITEM *item, int idx, const void *value)
+{
+    if (item == NULL || value == NULL || idx < 0 || idx >= item->n_fields)
     {
         return false;
+    }
+
+    FIELD *f = &item->fields[idx];
+    switch (f->type)
+    {
+        case ITEM_INT:    f->v.i = *(const int *)value;    break;
+        case ITEM_DOUBLE: f->v.d = *(const double *)value; break;
+        case ITEM_CHAR:   f->v.c = *(const char *)value;   break;
+        case ITEM_BOOL:   f->v.b = *(const bool *)value;   break;
+        case ITEM_PCHAR:
+        {
+            const char *src = (const char *)value;
+            char *copy = malloc(strlen(src) + 1);
+            if (copy == NULL)
+            {
+                return false;
+            }
+            strcpy(copy, src);
+            free(f->v.s);   /* libera a string anterior, se houver */
+            f->v.s = copy;
+            break;
+        }
+        default:
+            return false;
     }
 
     return true;
 }
 
-extern ITEM **create_item(int n_fields,DATATYPE types[5])
+extern const void *item_get(const ITEM *item, int idx)
 {
-    ITEM **new_item = calloc(1, sizeof(ITEM));
-    if(new_item == NULL)
+    if (item == NULL || idx < 0 || idx >= item->n_fields)
     {
         return NULL;
     }
-    (*new_item)->fields = calloc(n_fields, sizeof(void*));
-    for(int i = 0; i < 4; i++)
-    {
-        data_selector((*new_item)->fields[i], types[i]);
-    }
 
-    (*new_item)->n_fields = n_fields;
-    return new_item;
+    const FIELD *f = &item->fields[idx];
+    switch (f->type)
+    {
+        case ITEM_INT:    return &f->v.i;
+        case ITEM_DOUBLE: return &f->v.d;
+        case ITEM_CHAR:   return &f->v.c;
+        case ITEM_BOOL:   return &f->v.b;
+        case ITEM_PCHAR:  return f->v.s;
+        default:          return NULL;
+    }
 }
+
 extern bool delete_item(ITEM **item)
 {
-    if(item == NULL || *item == NULL)
+    if (item == NULL || *item == NULL)
     {
         return false;
     }
 
-    for(int i = 0; i < (*item)->n_fields; i++)
+    for (int i = 0; i < (*item)->n_fields; i++)
     {
-        //Se for *char tem que dar free nele primeiro, talvez mudar para outra solução
-        free((*item)->fields[i]);
+        if ((*item)->fields[i].type == ITEM_PCHAR)
+        {
+            free((*item)->fields[i].v.s);
+        }
     }
 
     free((*item)->fields);

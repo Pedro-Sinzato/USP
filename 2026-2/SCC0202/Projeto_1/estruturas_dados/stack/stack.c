@@ -5,18 +5,22 @@
 #include "stack.h"
 #include "../item.h"
 
-typedef struct node
+typedef struct node NODE;
+
+struct node
 {
     ITEM *item;
     NODE *anterior;
-}NODE;
+};
 
 struct stack
 {
-    ED base;
+    ED base;    /* PRECISA ser o primeiro membro */
     NODE *top;
     int size;
 };
+
+/* Wrappers com a assinatura que a vtable espera (ED * em vez de STACK *) */
 static bool stack_destroy(ED **self)
 {
     STACK *stack = (STACK *)*self;
@@ -24,12 +28,19 @@ static bool stack_destroy(ED **self)
     if (ok) *self = NULL;
     return ok;
 }
+
+static bool stack_insert_ed(ED *self, ITEM *item)
+{
+    return stack_insert((STACK *)self, item);
+}
+
 static const ED_VTABLE stack_vtable =
 {
     .destroy_ed = stack_destroy,
-    .insert_ed = stack_insert
+    .insert_ed  = stack_insert_ed
 };
-STACK *create_stack(void)
+
+extern STACK *create_stack(void)
 {
     STACK *stack = calloc(1, sizeof(STACK));
     if (stack == NULL)
@@ -42,6 +53,7 @@ STACK *create_stack(void)
 
     return stack;
 }
+
 extern bool delete_stack(STACK **stack)
 {
     if (stack == NULL || *stack == NULL)
@@ -64,7 +76,8 @@ extern bool delete_stack(STACK **stack)
     return true;
 }
 
-ITEM *pilha_topo(STACK *stack) {
+extern ITEM *pilha_topo(STACK *stack)
+{
     if (stack == NULL || stack->size == 0)
     {
         return NULL;
@@ -73,9 +86,9 @@ ITEM *pilha_topo(STACK *stack) {
     return stack->top->item;
 }
 
-extern bool stack_insert(STACK *stack)
+extern bool stack_insert(STACK *stack, ITEM *item)
 {
-    if (stack == NULL)
+    if (stack == NULL || item == NULL)
     {
         return false;
     }
@@ -86,25 +99,26 @@ extern bool stack_insert(STACK *stack)
         return false;
     }
 
-    novo->item = create_item();
+    novo->item = item;
     novo->anterior = stack->top;
     stack->top = novo;
     stack->size++;
 
     return true;
 }
-extern bool stack_remove(STACK *stack)
+
+extern ITEM *stack_remove(STACK *stack)
 {
-    if (stack == NULL || stack->size)
+    if (stack == NULL || stack->size == 0)
     {
-        return false;
+        return NULL;
     }
 
     NODE *removido = stack->top;
     ITEM *item = removido->item;
-    stack->top= removido->anterior;
+    stack->top = removido->anterior;
     stack->size--;
 
     free(removido);
-    return true;
+    return item;
 }
