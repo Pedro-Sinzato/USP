@@ -4,7 +4,7 @@
 
 #include "item.h"
 
-typedef struct
+typedef struct field
 {
     DATATYPE type;
     union
@@ -23,20 +23,28 @@ struct item
     FIELD *fields;
 };
 
-extern ITEM *create_item(int n_fields, const DATATYPE types[])
+ITEM *create_item(int n_fields, const DATATYPE types[])
 {
     if (n_fields <= 0 || types == NULL)
     {
         return NULL;
     }
 
-    ITEM *item = malloc(sizeof(ITEM));
+    for (int i = 0; i < n_fields; i++)
+    {
+        if (types[i] < ITEM_INT || types[i] > ITEM_BOOL)
+        {
+            return NULL;
+        }
+    }
+
+    ITEM *item = malloc(sizeof(*item));
     if (item == NULL)
     {
         return NULL;
     }
 
-    item->fields = calloc(n_fields, sizeof(FIELD));
+    item->fields = calloc((size_t)n_fields, sizeof(*item->fields));
     if (item->fields == NULL)
     {
         free(item);
@@ -44,68 +52,17 @@ extern ITEM *create_item(int n_fields, const DATATYPE types[])
     }
 
     item->n_fields = n_fields;
+
     for (int i = 0; i < n_fields; i++)
     {
         item->fields[i].type = types[i];
+        /* calloc inicializa os valores; strings começam como NULL. */
     }
 
     return item;
 }
 
-extern bool item_set(ITEM *item, int idx, const void *value)
-{
-    if (item == NULL || value == NULL || idx < 0 || idx >= item->n_fields)
-    {
-        return false;
-    }
-
-    FIELD *f = &item->fields[idx];
-    switch (f->type)
-    {
-        case ITEM_INT:    f->v.i = *(const int *)value;    break;
-        case ITEM_DOUBLE: f->v.d = *(const double *)value; break;
-        case ITEM_CHAR:   f->v.c = *(const char *)value;   break;
-        case ITEM_BOOL:   f->v.b = *(const bool *)value;   break;
-        case ITEM_PCHAR:
-        {
-            const char *src = (const char *)value;
-            char *copy = malloc(strlen(src) + 1);
-            if (copy == NULL)
-            {
-                return false;
-            }
-            strcpy(copy, src);
-            free(f->v.s);   /* libera a string anterior, se houver */
-            f->v.s = copy;
-            break;
-        }
-        default:
-            return false;
-    }
-
-    return true;
-}
-
-extern const void *item_get(const ITEM *item, int idx)
-{
-    if (item == NULL || idx < 0 || idx >= item->n_fields)
-    {
-        return NULL;
-    }
-
-    const FIELD *f = &item->fields[idx];
-    switch (f->type)
-    {
-        case ITEM_INT:    return &f->v.i;
-        case ITEM_DOUBLE: return &f->v.d;
-        case ITEM_CHAR:   return &f->v.c;
-        case ITEM_BOOL:   return &f->v.b;
-        case ITEM_PCHAR:  return f->v.s;
-        default:          return NULL;
-    }
-}
-
-extern bool delete_item(ITEM **item)
+bool delete_item(ITEM **item)
 {
     if (item == NULL || *item == NULL)
     {
@@ -114,7 +71,7 @@ extern bool delete_item(ITEM **item)
 
     for (int i = 0; i < (*item)->n_fields; i++)
     {
-        if ((*item)->fields[i].type == ITEM_PCHAR)
+        if ((*item)->fields[i].type == ITEM_STRING)
         {
             free((*item)->fields[i].v.s);
         }
@@ -123,6 +80,59 @@ extern bool delete_item(ITEM **item)
     free((*item)->fields);
     free(*item);
     *item = NULL;
+
+    return true;
+}
+
+bool item_set(ITEM *item, const void *value, int idx)
+{
+    if (item == NULL || value == NULL ||
+        idx < 0 || idx >= item->n_fields)
+    {
+        return false;
+    }
+
+    FIELD *field = &item->fields[idx];
+
+    switch (field->type)
+    {
+        case ITEM_INT:
+            field->v.i = *(const int *)value;
+            break;
+
+        case ITEM_DOUBLE:
+            field->v.d = *(const double *)value;
+            break;
+
+        case ITEM_CHAR:
+            field->v.c = *(const char *)value;
+            break;
+
+        case ITEM_BOOL:
+            field->v.b = *(const bool *)value;
+            break;
+
+        case ITEM_STRING:
+        {
+            const char *str = (const char *)value;
+            size_t len = strlen(str) + 1;
+
+            char *copy = malloc(len);
+            if (copy == NULL)
+            {
+                return false;
+            }
+
+            memcpy(copy, str, len);
+
+            free(field->v.s);
+            field->v.s = copy;
+            break;
+        }
+
+        default:
+            return false;
+    }
 
     return true;
 }

@@ -20,26 +20,6 @@ struct stack
     int size;
 };
 
-/* Wrappers com a assinatura que a vtable espera (ED * em vez de STACK *) */
-static bool stack_destroy(ED **self)
-{
-    STACK *stack = (STACK *)*self;
-    bool ok = delete_stack(&stack);
-    if (ok) *self = NULL;
-    return ok;
-}
-
-static bool stack_insert_ed(ED *self, ITEM *item)
-{
-    return stack_insert((STACK *)self, item);
-}
-
-static const ED_VTABLE stack_vtable =
-{
-    .destroy_ed = stack_destroy,
-    .insert_ed  = stack_insert_ed
-};
-
 extern STACK *create_stack(void)
 {
     STACK *stack = calloc(1, sizeof(STACK));
@@ -48,12 +28,8 @@ extern STACK *create_stack(void)
         return NULL;
     }
 
-    stack->base.ed_vtable = &stack_vtable;
-    stack->base.ed_types  = PILHA;
-
     return stack;
 }
-
 extern bool delete_stack(STACK **stack)
 {
     if (stack == NULL || *stack == NULL)

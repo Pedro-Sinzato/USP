@@ -1,30 +1,38 @@
-#include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
-
 #include "lista_cabeca.h"
-#include "../item.h"
 
-struct lista_cabeca
-{
-    NO *cabeca;
-    NO *fim;
-    int tamanho;
-};
 struct no
 {
     ITEM *item;
     NO *proximo;
 };
 
+struct lista_cabeca
+{
+    NO *cabeca; /* nó sentinela: não guarda item */
+    NO *fim;    /* último nó (aponta para cabeca se a lista está vazia) */
+    int tamanho;
+};
+
 LISTA_CABECA *lista_criar(void)
 {
-    //Calloc zera ou NULL nos campos
-    LISTA_CABECA *lista = calloc(1, sizeof(LISTA_CABECA));
+    LISTA_CABECA *lista = malloc(sizeof(LISTA_CABECA));
     if (lista == NULL)
     {
         return NULL;
     }
+
+    /* calloc: item = NULL e proximo = NULL */
+    lista->cabeca = calloc(1, sizeof(NO));
+    if (lista->cabeca == NULL)
+    {
+        free(lista);
+        return NULL;
+    }
+
+    lista->fim = lista->cabeca;
+    lista->tamanho = 0;
 
     return lista;
 }
@@ -52,38 +60,25 @@ bool lista_apagar(LISTA_CABECA **lista)
     return true;
 }
 
-bool lista_inserir(LISTA_CABECA *lista, ITEM *item) {
-    if (lista == NULL || item == NULL) return false;
+bool lista_inserir(LISTA_CABECA *lista, ITEM *item)
+{
+    if (lista == NULL || item == NULL)
+    {
+        return false;
+    }
 
     NO *novo = malloc(sizeof(NO));
-    if (novo == NULL) return false;
+    if (novo == NULL)
+    {
+        return false;
+    }
 
     novo->item = item;
     novo->proximo = NULL;
 
-    if (lista->fim == NULL) {
-        lista->cabeca->proximo = novo;
-    } else {
-        lista->fim->proximo = novo;
-    }
-
+    lista->fim->proximo = novo;
     lista->fim = novo;
     lista->tamanho++;
 
     return true;
-}
-
-ITEM *lista_buscar(LISTA *lista, int chave) {
-    if (lista == NULL) return NULL;
-
-    NO *atual = lista->cabeca->proximo;
-
-    while (atual != NULL) {
-        if (item_chave(atual->item) == chave)
-            return atual->item;
-
-        atual = atual->proximo;
-    }
-
-    return NULL;
 }
