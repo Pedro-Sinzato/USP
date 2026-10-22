@@ -183,7 +183,16 @@ bool delete_cross_list(CROSS_LIST **cross_list)
  * @param[in] endereço do item a ser inserido nas listas.
  * @return TRUE se conseguir e FALSE se não conseguir (Lembrando que se o item nao tiver o field [campo do tipo x] usado na ordenacao da lista-linha ou da lista-coluna, isso leva a um erro).
  */
-bool add_item(CROSS_LIST *cross_list, ITEM* item);
+bool add_item(CROSS_LIST *cross_list, ITEM* item)
+{
+    //insercao na lista-linha
+
+    
+    //insercao na lista-coluna
+
+    
+    return true;
+}
 
 /** As funcoes de remocao foram removidas por obsolecencia
  * @brief Remove o ITEM na primeira posicao da lista indicada (lista-linha ou lista-coluna).
@@ -218,3 +227,9 @@ bool remove_search(CROSS_LIST *linked_list, void *key, DATATYPE keyType, int lis
  * @return Ponteiro para ITEM, NULL em caso de erros (lista/item inexistente ou nao encontrado, listIndicator invalido, etc).
  */
 ITEM *search(CROSS_LIST *linked_list, void *key, DATATYPE keyType, int listIndicator);
+
+
+/*
+ONDE VOCE PAROU:
+eu tava implementando as funções restantes do TAD, mas também vale a pena eu revisar o que já foi feito pra adaptar pro novo tipo de ITEM
+*/
