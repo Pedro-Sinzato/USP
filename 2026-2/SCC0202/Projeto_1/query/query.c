@@ -308,3 +308,4 @@ extern CAMPO query_cross(const QUERY *query, int i)
     }
     return query->cross[i];
 }
+*/

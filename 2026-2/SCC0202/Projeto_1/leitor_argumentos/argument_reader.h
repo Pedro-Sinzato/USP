@@ -27,13 +27,6 @@ extern ARGUMENTS *create_arguments(void);
  * @return TRUE se conseguir e FALSE se não conseguir.
  */
 extern bool delete_arguments(ARGUMENTS **arguments);
-
-/**
- * @brief Copia uma palavra de ARG_V para DESTINO.
- * @param[out] Ponteiro para DESTINO.
- * @param[in] Ponteiro para a palavra em ARG_V
- */
-static void copy_arg(char *destino, const char *arg_word);
 /**
  * @brief Lê ARG_V,faz o parsing e guarda em ARGUMENTS.
  * @param[in] ARG_C

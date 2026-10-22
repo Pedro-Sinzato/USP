@@ -4,20 +4,27 @@
 #include <stdbool.h>
 
 #include "../item.h"
-#include "../../estruturas_dados.h"
 
 typedef struct stack STACK;
 
+/**
+ * @brief Cria STACK.
+ * @return Retorna um pontero para STACK.
+ */
 extern STACK *create_stack(void);
+/**
+ * @brief Apaga STACK.
+ * @param[out] Endereço de STACK
+ * @return Retorna TRUE se conseguir e false não.
+ */
 extern bool delete_stack(STACK **stack);
 
-/* Empilha o item (a pilha passa a ser dona dele). */
+/**
+ * @brief Empilha ITEM em STACK.
+ * @param[out] Ponteiro para STACK.
+ * @param[out] Ponteiro para o ITEM que vai ser empilhado,
+ * @return Retorna TRUE se conseguir e false não.
+ */
 extern bool stack_insert(STACK *stack, ITEM *item);
-
-/* Desempilha e devolve o item ao cliente (que deve liberá-lo com delete_item). NULL se vazia. */
-extern ITEM *stack_remove(STACK *stack);
-
-/* Devolve o item do topo sem remover. NULL se vazia. */
-extern ITEM *pilha_topo(STACK *stack);
 
 #endif

@@ -2,8 +2,8 @@
 #include <stdbool.h>
 
 #include "leitor_argumentos/argument_reader.h"
-#include "estruturas_dados/stack/stack.h"
-#include "reader.h"
+#include "estruturas_dados/estruturas_dados.h"
+#include "csv_reader/reader.h"
 
 enum nasa_campo
 {
@@ -57,9 +57,13 @@ int main(int argc, char *argv[])
     ARGUMENTS *arg = create_arguments();
     argument_parser(argc, argv, arg);
 
-    STACK *stack = create_stack();
+    ED *ed  = create_ed(ed_type_from_name(get_base(arg)));
 
-    reader(stack, arg, *TIPOS_ASTEROIDE, NASA_N_CAMPOS);
+    reader(ed, arg, TIPOS_ASTEROIDE, NASA_N_CAMPOS);
+    print_ed(ed);
+
+    delete_arguments(&arg);
+    destroy_ed(&ed);                          /* libera os itens da fila */
 
     return EXIT_SUCCESS;
 }

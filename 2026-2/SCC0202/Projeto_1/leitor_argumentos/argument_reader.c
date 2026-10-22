@@ -40,7 +40,11 @@ extern bool delete_arguments(ARGUMENTS **arguments)
 
     return true;
 }
-
+/**
+ * @brief Copia uma palavra de ARG_V para DESTINO.
+ * @param[out] Ponteiro para DESTINO.
+ * @param[in] Ponteiro para a palavra em ARG_V
+ */
 static void copy_arg(char *destino, const char *arg_word)
 {
     strncpy(destino, arg_word, ARG_MAX_LEN - 1);

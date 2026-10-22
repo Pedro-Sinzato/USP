@@ -1,4 +1,3 @@
-#include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -135,4 +134,110 @@ bool item_set(ITEM *item, const void *value, int idx)
     }
 
     return true;
+}
+/* Escreve uma string como campo CSV; entre aspas se tiver , " ou quebra de linha. */
+static void write_csv_string(const char *s, FILE *out)
+{
+    if (s == NULL)
+    {
+        return;                             /* campo vazio */
+    }
+
+    if (strpbrk(s, ",\"\r\n") == NULL)
+    {
+        fputs(s, out);
+        return;
+    }
+
+    fputc('"', out);
+    for (; *s != '\0'; s++)
+    {
+        if (*s == '"')
+        {
+            fputc('"', out);                /* aspas dentro do campo são dobradas */
+        }
+        fputc(*s, out);
+    }
+    fputc('"', out);
+}
+
+bool item_write_csv(const ITEM *item, FILE *out)
+{
+    if (item == NULL || out == NULL)
+    {
+        return false;
+    }
+
+    for (int i = 0; i < item->n_fields; i++)
+    {
+        const FIELD *f = &item->fields[i];
+
+        if (i > 0)
+        {
+            fputc(',', out);
+        }
+
+        switch (f->type)
+        {
+            case ITEM_INT:
+                fprintf(out, "%d", f->v.i);
+                break;
+            case ITEM_DOUBLE:
+                fprintf(out, "%.15g", f->v.d);
+                break;
+            case ITEM_CHAR:
+            {
+                char s[2] = { f->v.c, '\0' };
+                write_csv_string(s, out);
+                break;
+            }
+            case ITEM_STRING:
+                write_csv_string(f->v.s, out);
+                break;
+            case ITEM_BOOL:
+                fputs(f->v.b ? "True" : "False", out);
+                break;
+        }
+    }
+
+    fputc('\n', out);
+
+    return ferror(out) == 0;
+}
+void item_print(const ITEM *item)
+{
+    if (item == NULL)
+    {
+        printf("(item nulo)\n");
+        return;
+    }
+
+    for (int i = 0; i < item->n_fields; i++)
+    {
+        const FIELD *f = &item->fields[i];
+
+        if (i > 0)
+            fputs(" | ", stdout);
+
+        switch (f->type)
+        {
+            case ITEM_INT:
+                printf("%d", f->v.i);
+                break;
+            case ITEM_DOUBLE:
+                printf("%.15g", f->v.d);
+                break;
+            case ITEM_CHAR:
+                printf("'%c'", f->v.c);
+                break;
+            case ITEM_STRING:
+                printf("\"%s\"", f->v.s ? f->v.s : "(null)");
+                break;
+            case ITEM_BOOL:
+                fputs(f->v.b ? "true" : "false", stdout);
+                break;
+        }
+    }
+
+    printf("\n");
 }

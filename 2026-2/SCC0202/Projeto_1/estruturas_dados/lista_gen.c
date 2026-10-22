@@ -1,3 +1,4 @@
+/*
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -7,7 +8,7 @@
 typedef struct no_ NO;
 // 0 pro atomo, 1 pra listinha
 struct no_ {
-    int tipo; 
+    int tipo;
     union {
         ITEM *atomo;
         NO *sublista;
@@ -163,3 +164,4 @@ int lista_profundidade(const LISTA *lista) {
 bool lista_vazia(const LISTA *lista) {
     return lista != NULL && lista->inicio == NULL;
 }
+*/

@@ -4,23 +4,30 @@
 #include <stdbool.h>
 
 #include "../item.h"
+#include "../estruturas_dados.h"
 
-typedef struct lista_cabeca LISTA_CABECA;
-typedef struct no NO;
+typedef struct lista_cabeca HEAD_LIST;
 
-/* Cria uma lista vazia (com nó cabeça). Retorna NULL em caso de erro. */
-extern LISTA_CABECA *lista_criar(void);
-
-/*
- * Apaga a lista, liberando todos os nós e também os itens armazenados
- * (via delete_item). Zera *lista.
+/**
+ * @brief Cria uma lista vazia com nó cabeça (sentinela, não guarda ITEM).
+ * @return Ponteiro para a lista, ou NULL em caso de erro.
  */
-extern bool lista_apagar(LISTA_CABECA **lista);
+extern HEAD_LIST *create_lista_cabeca(void);
 
-/*
- * Insere o item no final da lista. A lista passa a ser dona do item:
- * ele será liberado em lista_apagar. Retorna false em caso de erro.
+/**
+ * @brief Apaga a lista, liberando o nó cabeça, todos os nós e os ITEMs
+ * armazenados (via delete_item).
+ * @param[in,out] lista Endereço do ponteiro da lista; vira NULL ao final.
+ * @return true se conseguiu (ou se não havia lista), false caso contrário.
  */
-extern bool lista_inserir(LISTA_CABECA *lista, ITEM *item);
+extern bool delete_lista_cabeca(HEAD_LIST **lista);
+
+/**
+ * @brief Insere o ITEM no final da lista (a lista passa a ser dona dele).
+ * @param[in,out] lista Ponteiro para a lista.
+ * @param[in] item Ponteiro para o ITEM a inserir.
+ * @return true se conseguiu, false caso contrário.
+ */
+extern bool lista_cabeca_insert(HEAD_LIST *lista, ITEM *item);
 
 #endif

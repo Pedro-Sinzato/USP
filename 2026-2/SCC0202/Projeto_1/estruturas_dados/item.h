@@ -1,6 +1,7 @@
 #ifndef ITEM_H
 #define ITEM_H
 
+#include <stdio.h>
 #include <stdbool.h>
 
 typedef enum datatype
@@ -34,5 +35,16 @@ bool delete_item(ITEM **item);
  * Strings são copiadas para memória própria do item.
  */
 bool item_set(ITEM *item, const void *value, int idx);
+/**
+ * @brief Escreve o ITEM como uma linha de CSV (campos separados por vírgula,
+ * terminada por '\n'). Strings com vírgula, aspas ou quebra de linha saem
+ * entre aspas.
+ * @param[in] item ITEM a escrever.
+ * @param[in] out Arquivo (ou stdout) onde escrever.
+ * @return true se conseguiu, false caso contrário.
+ */
+bool item_write_csv(const ITEM *item, FILE *out);
+/* Imprime os campos do item em uma linha, separados por " | " (para depuração). */
+void item_print(const ITEM *item);
 
 #endif
