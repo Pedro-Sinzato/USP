@@ -44,12 +44,14 @@ bool delete_cross_list(CROSS_LIST **cross_list);
  */
 bool add_item(CROSS_LIST *cross_list, ITEM* item);
 
-/**
- * @brief Remove o ITEM na primeira posicao da lista indicada (lista-linha ou lista-coluna).
+/** As funcoes de remocao foram removidas por obsolecencia
+
+
+* @brief Remove o ITEM na primeira posicao da lista indicada (lista-linha ou lista-coluna).
  * @param[out] Ponteiro  para a CROSS_LIST.
  * @param[in] numero que indica se o item a ser removido e o primeiro da lista-linha (listIndicator == 0) ou da lista-coluna (listIndicador == 1)
  * @return TRUE se conseguir e FALSE se não conseguir ou se o listIndicator for invalido.
- */
+ 
 bool remove_start(CROSS_LIST *cross_list, int listIndicator);
 /**
  * @brief Remove ITEM correspondente a KEY de CROSS_LIST.
@@ -58,15 +60,17 @@ bool remove_start(CROSS_LIST *cross_list, int listIndicator);
  * @param[in] keyType - determina qual o tipo do item a ser inserido para que um metodo de comparacao apropriado possa ser usado
  * @param[in] listIndicator - numero que indica se a chave do item a ser removido deve ser procurado a partir da lista-linha (listIndicator == 0) ou da lista-coluna (listIndicador == 1)
  * @return TRUE se conseguir e FALSE se não conseguir ou se o listIndicator for invalido.
- */
+ 
 bool remove_search(CROSS_LIST *linked_list, void *key, DATATYPE keyType, int listIndicator);
 /**
  * @brief Remove ITEM no fim de LINKED_LIST.
  * @param[out] Ponteiro  para a LINKED_LIST.
  * @param[in] numero que indica se o item a ser removido e o ultimo da lista-linha (listIndicator == 0) ou da lista-coluna (listIndicador == 1)
  * @return TRUE se conseguir e FALSE se não conseguir ou se o listIndicator for invalido.
+ bool remove_end(CROSS_LIST *cross_list, int listIndicator);
  */
-bool remove_end(CROSS_LIST *cross_list, int listIndicator);
+
+
 
 /**
  * @brief Busca por ITEM correspondente a KEY de LINKED_LIST.

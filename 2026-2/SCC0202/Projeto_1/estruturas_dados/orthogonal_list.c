@@ -46,15 +46,15 @@ typedef struct node NODE;
 
 struct orthogonal_list
 {
-    NODE* startLine;
+    NODE* lineStart;
     DATATYPE lineSortingType;
-    NODE* startColumn;
+    NODE* columnStart;
     DATATYPE columnSortingType;
     int len; 
 };
 
-//prototipos
 
+//prototipos
 CROSS_LIST *create_cross_list(DATATYPE lineCriteria, DATATYPE columnCriteria);
 bool delete_cross_list(CROSS_LIST **cross_list);
 bool add_item(CROSS_LIST *cross_list, ITEM* item);
@@ -71,14 +71,111 @@ ITEM *search(CROSS_LIST *linked_list, void *key, DATATYPE keyType, int listIndic
  * @param[in] tipos de dado usados para a ordenacao das linha e coluna respectivamente
  * @return Ponteiro para a CROSS_LIST ou NULL no caso de erros.
  */
-CROSS_LIST *create_cross_list(DATATYPE lineCriteria, DATATYPE columnCriteria);
+CROSS_LIST *create_cross_list(DATATYPE lineCriteria, DATATYPE columnCriteria)
+{
+    CROSS_LIST* xList = (CROSS_LIST*)malloc(sizeof(CROSS_LIST));
+
+    if(xList == NULL)
+    {
+        printf("Falha na alocacao da lista cruzada");
+        return xList;
+    }
+
+    xList->len = 0;
+    xList->lineStart = NULL;
+    xList->lineSortingType = lineCriteria;
+    xList->columnStart = NULL;
+    xList->columnSortingType = columnCriteria;
+
+    return xList;
+}
 
 /**
  * @brief Deleta CROSS_LIST
  * @param[out] Ponteiro duplo para CROSS_LIST
  * @return TRUE se conseguir e FALSE se não conseguir.
  */
-bool delete_cross_list(CROSS_LIST **cross_list);
+bool delete_cross_list(CROSS_LIST **cross_list)
+{
+    if(cross_list == NULL || *cross_list == NULL)
+    {
+        printf("ponteiro de lista cruzada invalido para delecao");
+        return false;
+    }
+
+   NODE *current, *next;
+   current = (*cross_list)->lineStart;
+   next = current->next;
+
+    for (int i = 0; i < (*cross_list)->len; i++) //passa pela lista-linha e vai liberando os nos e os itens
+    {
+        if(current == NULL) //redundancia caso o len tenha quebrado
+        {
+            printf("possivel erro na delecao da lista cruzada");
+            break;
+        }
+
+        if(current->previous != NULL) //se tiver antecessor, tira os ponteiros nas duas direcoes
+        {
+            current->previous->next = NULL;
+            current->previous = NULL;
+        }
+        if(current->next != NULL) //se tiver sucessor, tira os ponteiros nas duas direcoes
+        {
+            current->next->previous = NULL;
+            current->next = NULL;
+        }
+        delete_item(&(current->item));
+        free(current);
+
+        current = next;
+        next = current->next;
+        
+        if(next == NULL) //se encontrar NULL no proximo tem uma chance da variavel len ter quebrado, isso e apeans uma redundancia
+        {
+            printf("possivel erro na delecao da lista cruzada");
+            break;
+        }
+    }
+    (*cross_list)->lineStart = NULL; //completa a liberacao da lista-linha
+
+    for(int i = 0; i < (*cross_list)->len; i++) //passa pela lista-coluna liberando seus nos e tirando ponteiros pendentes
+    {
+        if(current == NULL) //redundancia caso o len tenha quebrado
+        {
+            printf("possivel erro na delecao da lista cruzada");
+            return false;
+        }
+
+        if(current->previous != NULL) //se tiver antecessor, tira os ponteiros nas duas direcoes
+        {
+            current->previous->next = NULL;
+            current->previous = NULL;
+        }
+        if(current->next != NULL) //se tiver sucessor, tira os ponteiros nas duas direcoes
+        {
+            current->next->previous = NULL;
+            current->next = NULL;
+        }
+        current->item = NULL; //o item ja foi deletado no loop anterior, isso apenas tira o ponteiro pendente
+        free(current);
+
+        current = next;
+        next = current->next;
+        
+        if(next == NULL) //se encontrar NULL no proximo tem uma chance da variavel len ter quebrado, isso e apeans uma redundancia
+        {
+            printf("possivel erro na delecao da lista cruzada"); //isso pode indicar um erro na variavel len ou em algum ponteiro ao longo da lista
+            return false;
+        }
+    }
+    (*cross_list)->columnStart = NULL; //completa a liberacao da lista-coluna
+
+    free((*cross_list)); //libera a estrutura principal e tira ponteiro pendente
+    cross_list = NULL;
+
+    return true;
+}
 
 /**
  * @brief Adicona um ITEM nas lista-linha e lista-coluna na posicao determinada pela ordenacao da lista baseado nos lineCriteria e columnCriteria.
@@ -88,12 +185,12 @@ bool delete_cross_list(CROSS_LIST **cross_list);
  */
 bool add_item(CROSS_LIST *cross_list, ITEM* item);
 
-/**
+/** As funcoes de remocao foram removidas por obsolecencia
  * @brief Remove o ITEM na primeira posicao da lista indicada (lista-linha ou lista-coluna).
  * @param[out] Ponteiro  para a CROSS_LIST.
  * @param[in] numero que indica se o item a ser removido e o primeiro da lista-linha (listIndicator == 0) ou da lista-coluna (listIndicador == 1)
  * @return TRUE se conseguir e FALSE se não conseguir ou se o listIndicator for invalido.
- */
+
 bool remove_start(CROSS_LIST *cross_list, int listIndicator);
 /**
  * @brief Remove ITEM correspondente a KEY de CROSS_LIST.
@@ -102,15 +199,15 @@ bool remove_start(CROSS_LIST *cross_list, int listIndicator);
  * @param[in] keyType - determina qual o tipo do item a ser inserido para que um metodo de comparacao apropriado possa ser usado
  * @param[in] listIndicator - numero que indica se a chave do item a ser removido deve ser procurado a partir da lista-linha (listIndicator == 0) ou da lista-coluna (listIndicador == 1)
  * @return TRUE se conseguir e FALSE se não conseguir ou se o listIndicator for invalido.
- */
+
 bool remove_search(CROSS_LIST *linked_list, void *key, DATATYPE keyType, int listIndicator);
 /**
  * @brief Remove ITEM no fim de LINKED_LIST.
  * @param[out] Ponteiro  para a LINKED_LIST.
  * @param[in] numero que indica se o item a ser removido e o ultimo da lista-linha (listIndicator == 0) ou da lista-coluna (listIndicador == 1)
  * @return TRUE se conseguir e FALSE se não conseguir ou se o listIndicator for invalido.
+ bool remove_end(CROSS_LIST *cross_list, int listIndicator);
  */
-bool remove_end(CROSS_LIST *cross_list, int listIndicator);
 
 /**
  * @brief Busca por ITEM correspondente a KEY de LINKED_LIST.
