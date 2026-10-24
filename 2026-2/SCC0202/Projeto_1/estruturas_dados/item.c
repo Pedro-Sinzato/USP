@@ -241,3 +241,48 @@ void item_print(const ITEM *item)
 
     printf("\n");
 }
+
+DATATYPE get_field_type(const ITEM *item, int pos)
+{
+    if(pos < 0 || pos >= (item->n_fields))
+    {
+        return -1;
+    }
+    return item->fields[pos].type;
+}
+const void *get_field_content(const ITEM *item, int pos)
+{
+    if (item == NULL || pos < 0 || pos >= item->n_fields)
+    {
+        return NULL;
+    }
+
+    const FIELD *field = &item->fields[pos];
+    switch(field->type)
+    {
+        case ITEM_INT:
+        {
+            return &field->v.i;
+        }
+        case ITEM_DOUBLE:
+        {
+            return &field->v.d;
+        }
+        case ITEM_CHAR:
+        {
+            return &field->v.c;
+        }
+        case ITEM_BOOL:
+        {
+            return &field->v.b;
+        }
+        case ITEM_STRING:
+        {
+            return field->v.s;
+        }
+        default:
+        {
+            return NULL;
+        }
+    }
+}

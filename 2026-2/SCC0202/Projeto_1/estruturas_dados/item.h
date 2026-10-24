@@ -47,4 +47,12 @@ bool item_write_csv(const ITEM *item, FILE *out);
 /* Imprime os campos do item em uma linha, separados por " | " (para depuração). */
 void item_print(const ITEM *item);
 
+/**
+ * @brief Funções de GET para o tipo de dado e conteúdo do campo
+ * @param[in] Ponteiro para ITEM.
+ * @param[in] Index do ITEM no array de CAMPPOS.
+ * @return -1 se POS for inválido || NULL se ITEM inválido ou POS inválido
+ */
+DATATYPE item_get_type(const ITEM *item, int pos);
+const void *get_field_content(const ITEM *item, int pos);
 #endif
