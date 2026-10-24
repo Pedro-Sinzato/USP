@@ -33,6 +33,7 @@ que e informado com base no enumerador datatype (dos arquivos item)
 #include <string.h>
 
 #include "orthogonal_list.h"
+#include "../camposNasa.h"
 #include "item.c"
 
 struct node
@@ -47,15 +48,15 @@ typedef struct node NODE;
 struct orthogonal_list
 {
     NODE* lineStart;
-    DATATYPE lineSortingType;
+    DATATYPE lineSortingField;
     NODE* columnStart;
-    DATATYPE columnSortingType;
+    DATATYPE columnSortingField;
     int len; 
 };
 
 
 //prototipos
-CROSS_LIST *create_cross_list(DATATYPE lineCriteria, DATATYPE columnCriteria);
+CROSS_LIST *create_cross_list(int lineCriteria, int columnCriteria);
 bool delete_cross_list(CROSS_LIST **cross_list);
 bool add_item(CROSS_LIST *cross_list, ITEM* item);
 bool remove_start(CROSS_LIST *cross_list, int listIndicator);
@@ -68,10 +69,10 @@ ITEM *search(CROSS_LIST *linked_list, void *key, DATATYPE keyType, int listIndic
 
 /**
  * @brief Cria CROSS_LIST
- * @param[in] tipos de dado usados para a ordenacao das linha e coluna respectivamente
+ * @param[in] INTs que indicam a posicao dos campos no vetor FIELDS do item usados para a ordenacao das linha e coluna respectivamente
  * @return Ponteiro para a CROSS_LIST ou NULL no caso de erros.
  */
-CROSS_LIST *create_cross_list(DATATYPE lineCriteria, DATATYPE columnCriteria)
+CROSS_LIST *create_cross_list(int lineCriteria, int columnCriteria)
 {
     CROSS_LIST* xList = (CROSS_LIST*)malloc(sizeof(CROSS_LIST));
 
@@ -83,9 +84,9 @@ CROSS_LIST *create_cross_list(DATATYPE lineCriteria, DATATYPE columnCriteria)
 
     xList->len = 0;
     xList->lineStart = NULL;
-    xList->lineSortingType = lineCriteria;
+    xList->lineSortingField = lineCriteria;
     xList->columnStart = NULL;
-    xList->columnSortingType = columnCriteria;
+    xList->columnSortingField = columnCriteria;
 
     return xList;
 }
@@ -178,12 +179,341 @@ bool delete_cross_list(CROSS_LIST **cross_list)
 }
 
 /**
- * @brief Adicona um ITEM nas lista-linha e lista-coluna na posicao determinada pela ordenacao da lista baseado nos lineCriteria e columnCriteria.
+ * @brief Adicona um ITEM nas lista-linha e lista-coluna na posicao determinada pela ordenacao da lista baseado nos campos estabelecidos na criacao da lista cruzada.
  * @param[out] Ponteiro  para a LINKED_LIST.
  * @param[in] endereço do item a ser inserido nas listas.
  * @return TRUE se conseguir e FALSE se não conseguir (Lembrando que se o item nao tiver o field [campo do tipo x] usado na ordenacao da lista-linha ou da lista-coluna, isso leva a um erro).
  */
-bool add_item(CROSS_LIST *cross_list, ITEM* item);
+bool add_item(CROSS_LIST *cross_list, ITEM* item)
+{
+    if(cross_list == NULL || item == NULL)
+    {
+        printf("Item ou lista cruzada invalidas para insercao");
+        return false;
+    }
+
+    NODE* noLinha = (NODE*)malloc(sizeof(NODE));
+    NODE* noColuna = (NODE*)malloc(sizeof(NODE));
+
+    noLinha->item = item;
+    noColuna->item = item;
+
+    //caso de insercao caso nenhuma das duas listas tenha itens
+    /*
+    A principio, por agora, vai so funcionar com o asteroide, mas a framework para adaptar para o
+    petroleo ja vai estar ai, teremos apenas que implementar um if ou algo do tipo que verifica
+    uma variavel que fala qual banco de dados esta sendo usado
+    */
+    if(cross_list->len == 0)
+    {
+        cross_list->lineStart = noLinha;
+        cross_list->columnStart = noColuna;
+
+        noLinha->next = NULL;
+        noLinha->previous = NULL;
+        noColuna->next = NULL;
+        noColuna->previous = NULL;  
+    }
+    else //insercao padrao
+    {
+        /*A implementacao ordenada vai ser relativamente simples, quando for inserir um item
+        o algoritmo vai so ir checando item a item se o campo especificado e o outro, se sim, 
+        passa para a proxima posicao
+        como nao foi estabelecido como ordenar (crecente, decrescente, alfabetico, inverso, etc)
+        eu vou so fazer ordenacao crescente pra numericos, alfabetico para strings
+        como as strings do item sao padronizadas (letras maiusculass sempre aparecem na mesma
+        pos, etc) um simples strcmp deve funcionar.
+        */
+        NODE* aux; //ponteiro que vai ajudar a determinar em qual posicao inserir
+
+        //insercao na lista-linha
+        aux = cross_list->lineStart;
+
+        for(int i = 0; i < cross_list->len; i++)//cicles item per item, checking where the node should be placed
+        {
+            if(aux == NULL && i != (cross_list->len - 1)) //would indicate a possible error
+            {
+                break;
+            }
+
+            //check field, then determine where to put it, then adjust the connecting pointers
+            
+            //pega qual tipo de comparacao usar
+            if((int)(cross_list->lineSortingField) >= 0 && (int)(cross_list->lineSortingField) <= 4)
+            { //comparing strings (strcmp)
+                if(strcmp(aux->item->fields[cross_list->lineSortingField].v.s, item->fields[cross_list->lineSortingField].v.s) <= 0)
+                {// if the item of the position we are inspecting is bigger than the item to be inserted, we position our new node behind it
+                    noLinha->next = aux;
+                    if(i == 0) //if the item is to be placed behind the current first node;
+                    {
+                        noLinha->previous = NULL;
+                        cross_list->lineStart = noLinha;
+                    }
+                    else
+                    {
+                        noLinha->previous = aux->previous;
+                        aux->previous->next = noLinha;
+                    }
+                    aux->previous = noLinha;
+                    
+                    break; //if the program reaches here, it has placed the item, so the loop isnt necessary anymore
+                }
+                
+                if(i ==(cross_list->len - 1)) //if the item is to be placed at the end of the list
+                {
+                    aux->next = noLinha;
+                    noLinha->previous = aux;
+                    noLinha->next = NULL;
+
+                    break; //if the program reaches here, it has placed the item, so the loop isnt necessary anymore
+                }
+            }
+            else if ((int)(cross_list->lineSortingField) >= 5 && (int)(cross_list->lineSortingField) <= 7)
+            {//comparing boolean (true goes first, false goes later)
+                if(aux->item->fields[cross_list->lineSortingField].v.b == false &&
+                     item->fields[cross_list->lineSortingField].v.b == true) //
+                {// if the item of the position we are inspecting is false and the item is true, we position our new node behind it, in the border between the true and the false
+                    noLinha->next = aux;
+                    if(i == 0) //if the item is to be placed behind the current first node;
+                    {
+                        noLinha->previous = NULL;
+                        cross_list->lineStart = noLinha;
+                    }
+                    else
+                    {
+                        noLinha->previous = aux->previous;
+                        aux->previous->next = noLinha;
+                    }
+                    aux->previous = noLinha;
+                    
+                    break; //if the program reaches here, it has placed the item, so the loop isnt necessary anymore
+                }
+                
+                if(item->fields[cross_list->lineSortingField].v.b == false) //if the item is false it is to be placed at the end of the list
+                {
+                    aux->next = noLinha;
+                    noLinha->previous = aux;
+                    noLinha->next = NULL;
+
+                    break; //if the program reaches here, it has placed the item, so the loop isnt necessary anymore
+                }   
+            }
+            //comparing numeric
+            else if((int)cross_list->lineSortingField >= 8 && (int)cross_list->lineSortingField <= 11)
+            {//if its an integer
+                if(aux->item->fields[cross_list->lineSortingField].v.i > item->fields[cross_list->lineSortingField].v.i)
+                {// if the item of the position we are inspecting is bigger than the item to be inserted, we position our new node behind it
+                    noLinha->next = aux;
+                    if(i == 0) //if the item is to be placed behind the current first node;
+                    {
+                        noLinha->previous = NULL;
+                        cross_list->lineStart = noLinha;
+                    }
+                    else
+                    {
+                        noLinha->previous = aux->previous;
+                        aux->previous->next = noLinha;
+                    }
+                    aux->previous = noLinha;
+                    
+                    break; //if the program reaches here, it has placed the item, so the loop isnt necessary anymore
+                }
+                
+                if(i ==(cross_list->len - 1)) //if the item is to be placed at the end of the list
+                {
+                    aux->next = noLinha;
+                    noLinha->previous = aux;
+                    noLinha->next = NULL;
+
+                    break; //if the program reaches here, it has placed the item, so the loop isnt necessary anymore
+                }
+            }
+            else if ((int)cross_list->lineSortingField >= 12 && (int)cross_list->lineSortingField <= 19)
+            {//if its a double
+                if(aux->item->fields[cross_list->lineSortingField].v.d > item->fields[cross_list->lineSortingField].v.d)
+                {// if the item of the position we are inspecting is bigger than the item to be inserted, we position our new node behind it
+                    noLinha->next = aux;
+                    if(i == 0) //if the item is to be placed behind the current first node;
+                    {
+                        noLinha->previous = NULL;
+                        cross_list->lineStart = noLinha;
+                    }
+                    else
+                    {
+                        noLinha->previous = aux->previous;
+                        aux->previous->next = noLinha;
+                    }
+                    aux->previous = noLinha;
+                    
+                    break; //if the program reaches here, it has placed the item, so the loop isnt necessary anymore
+                }
+                
+                if(i ==(cross_list->len - 1)) //if the item is to be placed at the end of the list
+                {
+                    aux->next = noLinha;
+                    noLinha->previous = aux;
+                    noLinha->next = NULL;
+
+                    break; //if the program reaches here, it has placed the item, so the loop isnt necessary anymore
+                }
+            }
+            else
+            {
+                printf("erro na insercao na lista cruzada; tipo invalido");
+                return false;
+            }
+
+            //if it reaches here, it checked the position related to the current node aux is pointing to and the place wasnt aproppriate, so we move onto the next node
+            aux = aux->next; 
+        }
+
+
+        //insercao na lista-coluna
+        aux = cross_list->columnStart;
+
+        for(int i = 0; i < cross_list->len; i++)//cicles item per item, checking where the node should be placed
+        {
+            if(aux == NULL && i != (cross_list->len - 1)) //would indicate a possible error
+            {
+                break;
+            }
+
+            //check field, then determine where to put it, then adjust the connecting pointers
+            
+            //pega qual tipo de comparacao usar
+            if((int)(cross_list->columnSortingField) >= 0 && (int)(cross_list->columnSortingField) <= 4)
+            { //comparing strings (strcmp)
+                if(strcmp(aux->item->fields[cross_list->columnSortingField].v.s, item->fields[cross_list->columnSortingField].v.s) <= 0)
+                {// if the item of the position we are inspecting is bigger than the item to be inserted, we position our new node behind it
+                    noColuna->next = aux;
+                    if(i == 0) //if the item is to be placed behind the current first node;
+                    {
+                        noColuna->previous = NULL;
+                        cross_list->columnStart = noColuna;
+                    }
+                    else
+                    {
+                        noColuna->previous = aux->previous;
+                        aux->previous->next = noColuna;
+                    }
+                    aux->previous = noColuna;
+                    
+                    break; //if the program reaches here, it has placed the item, so the loop isnt necessary anymore
+                }
+                
+                if(i ==(cross_list->len - 1)) //if the item is to be placed at the end of the list
+                {
+                    aux->next = noColuna;
+                    noColuna->previous = aux;
+                    noColuna->next = NULL;
+
+                    break; //if the program reaches here, it has placed the item, so the loop isnt necessary anymore
+                }
+            }
+            else if ((int)(cross_list->columnSortingField) >= 5 && (int)(cross_list->columnSortingField) <= 7)
+            {//comparing boolean (true goes first, false goes later)
+                if(aux->item->fields[cross_list->columnSortingField].v.b == false &&
+                     item->fields[cross_list->columnSortingField].v.b == true) //
+                {// if the item of the position we are inspecting is false and the item is true, we position our new node behind it, in the border between the true and the false
+                    noColuna->next = aux;
+                    if(i == 0) //if the item is to be placed behind the current first node;
+                    {
+                        noColuna->previous = NULL;
+                        cross_list->columnStart = noColuna;
+                    }
+                    else
+                    {
+                        noColuna->previous = aux->previous;
+                        aux->previous->next = noColuna;
+                    }
+                    aux->previous = noColuna;
+                    
+                    break; //if the program reaches here, it has placed the item, so the loop isnt necessary anymore
+                }
+                
+                if(item->fields[cross_list->columnSortingField].v.b == false) //if the item is false it is to be placed at the end of the list
+                {
+                    aux->next = noColuna;
+                    noColuna->previous = aux;
+                    noColuna->next = NULL;
+
+                    break; //if the program reaches here, it has placed the item, so the loop isnt necessary anymore
+                }   
+            }
+            //comparing numeric
+            else if((int)cross_list->columnSortingField >= 8 && (int)cross_list->columnSortingField <= 11)
+            {//if its an integer
+                if(aux->item->fields[cross_list->columnSortingField].v.i > item->fields[cross_list->columnSortingField].v.i)
+                {// if the item of the position we are inspecting is bigger than the item to be inserted, we position our new node behind it
+                    noColuna->next = aux;
+                    if(i == 0) //if the item is to be placed behind the current first node;
+                    {
+                        noColuna->previous = NULL;
+                        cross_list->columnStart = noColuna;
+                    }
+                    else
+                    {
+                        noColuna->previous = aux->previous;
+                        aux->previous->next = noColuna;
+                    }
+                    aux->previous = noColuna;
+                    
+                    break; //if the program reaches here, it has placed the item, so the loop isnt necessary anymore
+                }
+                
+                if(i ==(cross_list->len - 1)) //if the item is to be placed at the end of the list
+                {
+                    aux->next = noColuna;
+                    noColuna->previous = aux;
+                    noColuna->next = NULL;
+
+                    break; //if the program reaches here, it has placed the item, so the loop isnt necessary anymore
+                }
+            }
+            else if ((int)cross_list->columnSortingField >= 12 && (int)cross_list->columnSortingField <= 19)
+            {//if its a double
+                if(aux->item->fields[cross_list->columnSortingField].v.d > item->fields[cross_list->columnSortingField].v.d)
+                {// if the item of the position we are inspecting is bigger than the item to be inserted, we position our new node behind it
+                    noColuna->next = aux;
+                    if(i == 0) //if the item is to be placed behind the current first node;
+                    {
+                        noColuna->previous = NULL;
+                        cross_list->columnStart = noColuna;
+                    }
+                    else
+                    {
+                        noColuna->previous = aux->previous;
+                        aux->previous->next = noColuna;
+                    }
+                    aux->previous = noColuna;
+                    
+                    break; //if the program reaches here, it has placed the item, so the loop isnt necessary anymore
+                }
+                
+                if(i ==(cross_list->len - 1)) //if the item is to be placed at the end of the list
+                {
+                    aux->next = noColuna;
+                    noColuna->previous = aux;
+                    noColuna->next = NULL;
+
+                    break; //if the program reaches here, it has placed the item, so the loop isnt necessary anymore
+                }
+            }
+            else
+            {
+                printf("erro na insercao na lista cruzada; tipo invalido");
+                return false;
+            }
+
+            //if it reaches here, it checked the position related to the current node aux is pointing to and the place wasnt aproppriate, so we move onto the next node
+            aux = aux->next; 
+        }
+    }
+
+    cross_list->len += 1;
+
+    return true;
+}
 
 /** As funcoes de remocao foram removidas por obsolecencia
  * @brief Remove o ITEM na primeira posicao da lista indicada (lista-linha ou lista-coluna).
@@ -218,3 +548,10 @@ bool remove_search(CROSS_LIST *linked_list, void *key, DATATYPE keyType, int lis
  * @return Ponteiro para ITEM, NULL em caso de erros (lista/item inexistente ou nao encontrado, listIndicator invalido, etc).
  */
 ITEM *search(CROSS_LIST *linked_list, void *key, DATATYPE keyType, int listIndicator);
+
+
+/**
+ aonde eu parei
+ eu tenho que implementar a funcao de busca, e talvez vale a pena de separar a comparacao entre os dois campos em
+ uma funcao separada, talvez, nao tenho certeza.
+ */
