@@ -1,4 +1,4 @@
-#include "math.h"
+#include <math.h>
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -43,6 +43,25 @@ struct query
     CAMPO order_campo;
     ORDEM order_dir;
 };
+
+/**
+ * @brief Identifica o campo e retorna o valor associado a ele.
+ * @param[in] Lista com o nome dos campo.
+ * @param[in] Quantos campos a lista tem.
+ * @param[in] Campo a ser comparado com a lista.
+ * @return A posição do campo na lista, se não houver, -1.
+ */
+int parse_campo(char **nomes_campos, int n_campos, char *campo)
+{
+    for(int i = 0; i < n_campos; i++)
+    {
+        if(strcmp(nomes_campos[i], campo) == 0)
+        {
+            return i;
+        }
+    }
+    return -1;
+}
 
 static QUERY *create_query(void)
 {
