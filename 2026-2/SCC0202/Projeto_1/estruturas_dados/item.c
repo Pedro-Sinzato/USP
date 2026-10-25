@@ -242,7 +242,7 @@ void item_print(const ITEM *item)
     printf("\n");
 }
 
-DATATYPE get_field_type(const ITEM *item, int pos)
+DATATYPE item_get_type(const ITEM *item, int pos)
 {
     if(pos < 0 || pos >= (item->n_fields))
     {
