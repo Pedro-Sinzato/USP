@@ -14,10 +14,10 @@ Essa consequencia tambem permite que a lista cruzada cumpra o seu proposito de r
 ser ineficiente de ser implementada como uma simples matriz sequencial, pois haveria muitos itens vazios. Considerando que a lista de 
 asteroides tem por volta de 89000 itens, uma matriz alocada sequencialmente ocuparia 89000*89000 espacos, com a maior parte desses ficando
 vazios, enquanto essa matriz esparca ocuparia, efetivamente, 89000*2 para os nos das linhas e das colunas + 89000 para a alocacao dos itens,
-que serao apontados pelas duas listas.
+que serao apontados pelas duas listas (totalizando 89000*3 itens alocados).
 
 Uma observacao relevante e que, embora na pratica a lista cruzada sera composta por duas listas encadeadas separadas, como isso e uma forma 
-de implementacao de uma unica lista cruzada, os itens que sao adicionados e retiradas tem essas operacoes aplicadas nas duas simultaneamente
+de implementacao de uma unica lista cruzada, os itens que sao adicionados e retiradas (caso fosse aplicavel) tem essas operacoes aplicadas nas duas listas simultaneamente
 o que faz com que as listas ordenadas se comportem como uma unica lista. E, alem disso, ambas as listas apontam para os mesmos itens alocados
 uma unica vez, com apenas os nos sendo alocados duas vezes (uma em cada lista) e apontando para esses itens de posicoes diferentes baseado nos
 criterios de ordenacao.
@@ -62,7 +62,7 @@ bool add_item(CROSS_LIST *cross_list, ITEM* item);
 bool remove_start(CROSS_LIST *cross_list, int listIndicator);
 bool remove_search(CROSS_LIST *linked_list, void *key, DATATYPE keyType, int listIndicator);
 bool remove_end(CROSS_LIST *cross_list, int listIndicator);
-ITEM *search(CROSS_LIST *linked_list, void *key, DATATYPE keyType, int listIndicator);
+ITEM *search(CROSS_LIST *linked_list, void *key, int field);
 
 
 //funcoes
@@ -231,7 +231,7 @@ bool add_item(CROSS_LIST *cross_list, ITEM* item)
 
         for(int i = 0; i < cross_list->len; i++)//cicles item per item, checking where the node should be placed
         {
-            if(aux == NULL && i != (cross_list->len - 1)) //would indicate a possible error
+            if(aux == NULL) //would indicate a possible error
             {
                 break;
             }
@@ -373,7 +373,7 @@ bool add_item(CROSS_LIST *cross_list, ITEM* item)
 
         for(int i = 0; i < cross_list->len; i++)//cicles item per item, checking where the node should be placed
         {
-            if(aux == NULL && i != (cross_list->len - 1)) //would indicate a possible error
+            if(aux == NULL) //would indicate a possible error
             {
                 break;
             }
@@ -540,18 +540,76 @@ bool remove_search(CROSS_LIST *linked_list, void *key, DATATYPE keyType, int lis
  */
 
 /**
- * @brief Busca por ITEM correspondente a KEY de LINKED_LIST.
- * @param[in] Cópia de LINKED_LIST.
- * @param[in] key - Ponteiro para o Key (Conteúdo) do ITEM (ponteiro pois o tipo do key e indeterminado).
- * @param[in] keyType - determina qual o tipo do item a ser inserido para que um metodo de comparacao apropriado possa ser usado
- * @param[in] listIndicator - numero que indica se a chave do item a ser retornado deve ser procurado a partir da lista-linha (listIndicator == 0) ou da lista-coluna (listIndicador == 1)
- * @return Ponteiro para ITEM, NULL em caso de erros (lista/item inexistente ou nao encontrado, listIndicator invalido, etc).
+ * @brief Busca por ITEM correspondente a KEY de CROSS_LIST.
+ * @param[in] Ponteiro para CROSS_LIST.
+ * @param[in] key - Ponteiro para o Key (Conteúdo) do ITEM (ponteiro para void pois o tipo do key e indeterminado).
+ * @param[in] field - int que indica em qual campo o valor de key esta localizado.
+ * @return Ponteiro para ITEM, NULL em caso de erros (lista/item inexistente ou nao encontrado, tipo de campo invalido, etc).
  */
-ITEM *search(CROSS_LIST *linked_list, void *key, DATATYPE keyType, int listIndicator);
+ITEM *search(CROSS_LIST *cross_list, void *key, int field)
+{
+    //determines if the search should happen on the line-list or column-list 
+    NODE* aux = cross_list->lineStart; //will look in the line-list by default, unless the field is the field used in the sorting of the column-line
+    if(field == cross_list->columnSortingField)
+    {//key being looked for is the same field as the column sorting field (so it should be near the top) 
+        aux = cross_list->columnStart;
+    }
+
+    for(int i = 0; i < cross_list->len; i++)
+    {
+        
+        if(aux == NULL) //would indicate a possible error
+        {
+            break;
+        }
+
+        //valid for asteroid only
+        if(field >= 0 && field <= 4)
+        { //looking for string (strcmp) - returns the first item found with the same string in the designated field
+            if(strcmp(aux->item->fields[field].v.s, *((char**)key)) == 0)
+            {
+                return aux->item;
+            }
+        }
+        else if (field >= 5 && field <= 7)
+        {//looking for boolean - returns the first item found with the same boolean value in the designated field
+            if(aux->item->fields[field].v.b == *((bool*)key))
+            {
+                return aux->item;
+            }   
+        }
+        //comparing numeric
+        else if(field >= 8 && field <= 11)
+        {//looking for an integer  - returns the first item found with the equivalent int value in the designated field
+            if(aux->item->fields[field].v.i == *((int*)key))
+            {
+                return aux->item;
+            }
+        }
+        else if (field >= 12 && field <= 19)
+        {//looking for a double  - returns the first item found with the equivalent double value in the designated field
+            if(aux->item->fields[field].v.d == *((double*)key))
+            {
+                return aux->item;
+            }
+        }
+        else
+        {
+            printf("erro na busca na lista cruzada; tipo invalido");
+            return false;
+        }   
+
+        aux = aux->next;
+    }
+
+    printf("Item nao encontrado");
+    return NULL;
+}
 
 
 /**
  aonde eu parei
- eu tenho que implementar a funcao de busca, e talvez vale a pena de separar a comparacao entre os dois campos em
- uma funcao separada, talvez, nao tenho certeza.
+ talvez vale a pena de separar a comparacao entre os dois campos em uma funcao separada, talvez, nao tenho certeza.
+
+ eu vou ter que adaptar o codigo depois para usar os item_get, ao inves de acessar os campos diretamente, quando ficar pronto, pro enquanto deixar assim mesmo
  */
