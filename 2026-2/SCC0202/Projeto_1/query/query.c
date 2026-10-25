@@ -56,13 +56,18 @@ static QUERY *create_query(void)
 extern bool delete_query(QUERY *query)
 {
     if (query == NULL)
-    {
         return false;
-    }
+
     for (int i = 0; i < query->n_sims; i++)
     {
         delete_sim(&query->sims[i]);
     }
+
+    for (int i = 0; i < query->n_filters; i++)
+    {
+        delete_filter(&query->filters[i]);
+    }
+
     free(query);
     return true;
 }
@@ -73,6 +78,22 @@ static bool add_sim(QUERY *query, CAMPO campo, double alvo, double tol, double p
     SIM *sim = create_sim(campo, alvo, tol, peso);
     if (sim == NULL) return false;
     query->sims[query->n_sims++] = sim;
+    return true;
+}
+
+static bool add_filter(QUERY *query, CAMPO campo,
+                       const char *operador, const char *valor)
+{
+    if (query == NULL || query->n_filters >= MAX_FILTERS)
+        return false;
+
+    FILTER *filter = create_filter(campo, operador, valor);
+
+    if (filter == NULL)
+        return false;
+
+    query->filters[query->n_filters++] = filter;
+
     return true;
 }
 
@@ -149,7 +170,7 @@ QUERY *query_reader(const char *query_name)
         {
             char *s_campo = strtok(NULL, "|");
             char *s_direcao   = strtok(NULL, "|");
-            if (s_campo == NULL || s_campo == NULL)
+            if (s_campo == NULL ||  s_direcao == NULL)
             {
                 continue; //Linha inválida
             }
@@ -209,7 +230,22 @@ QUERY *query_reader(const char *query_name)
             query->cross[1] = campo2;
             query->has_cross = true;
         }
-         //FILTER
+             else if (strcmp(tipo, "FILTER") == 0)
+        {
+            char *s_campo = strtok(NULL, "|");
+            char *s_operador = strtok(NULL, "|");
+            char *s_valor = strtok(NULL, "|");
+
+            if (s_campo == NULL || s_operador == NULL || s_valor == NULL)
+                continue;
+
+            CAMPO campo = parse_campo(s_campo);
+
+            if (campo == F_INVALID)
+                continue;
+
+            add_filter(query, campo, s_operador, s_valor);
+        }
     }
 
     fclose(query_file);
@@ -308,4 +344,17 @@ extern CAMPO query_cross(const QUERY *query, int i)
     }
     return query->cross[i];
 }
-*/
+/* FILTER */
+extern int query_n_filters(const QUERY *query)
+{
+    return query == NULL ? 0 : query->n_filters;
+}
+
+extern const FILTER *query_get_filter(const QUERY *query, int i)
+{
+    if (query == NULL || i < 0 || i >= query->n_filters)
+        return NULL;
+
+    return query->filters[i];
+}
+
