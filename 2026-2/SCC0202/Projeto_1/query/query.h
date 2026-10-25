@@ -27,7 +27,9 @@ extern CAMPO query_group(const QUERY *query, int i);   // i = 0 é o nível mais
 /* CROSS */
 extern bool  query_has_cross(const QUERY *query);
 extern CAMPO query_cross(const QUERY *query, int i);   // i = 0 ou 1
-extern int query_n_filters(const QUERY *query);
-extern const FILTER *query_get_filter(const QUERY *query, int i);
 
+//FILTER//
+extern const FILTER *query_get_filter(const QUERY *query, int i);
+extern int query_n_filters(const QUERY *query);
+extern bool apply_filters(const ITEM *item, const QUERY *query);
 #endif
