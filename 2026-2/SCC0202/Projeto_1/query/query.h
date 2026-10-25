@@ -1,5 +1,6 @@
 #ifndef QUERY_H
 #define QUERY_H
+#include "filter.h"
 
 #include <stdbool.h>
 #include "../nasa.h"
@@ -26,5 +27,7 @@ extern CAMPO query_group(const QUERY *query, int i);   // i = 0 é o nível mais
 /* CROSS */
 extern bool  query_has_cross(const QUERY *query);
 extern CAMPO query_cross(const QUERY *query, int i);   // i = 0 ou 1
+extern int query_n_filters(const QUERY *query);
+extern const FILTER *query_get_filter(const QUERY *query, int i);
 
 #endif
