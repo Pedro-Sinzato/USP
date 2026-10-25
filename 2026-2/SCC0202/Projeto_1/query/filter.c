@@ -1,13 +1,8 @@
-<<<<<<< HEAD
-=======
-
->>>>>>> 2b156907bbaf1caaca3926e16b16dd27569f3b92
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
 
 #include "filter.h"
-<<<<<<< HEAD
 #include "campo.h"
 
 union condicao
@@ -15,14 +10,10 @@ union condicao
     bool boleano;
     double valor;
 };
-=======
-#include "../estruturas_dados/item.h"
->>>>>>> 2b156907bbaf1caaca3926e16b16dd27569f3b92
 
 struct filter
 {
     CAMPO campo;
-<<<<<<< HEAD
     char *operador;
     CONDICAO condicao;
 };
@@ -43,7 +34,6 @@ extern FILTER *create_filter(CAMPO campo, char operador[3], CONDICAO condicao)
 
 extern OPERADOR parse_operador(const char *operador)
 {
-=======
     OPERADOR operador;
     char *valor;
 };
@@ -53,18 +43,12 @@ OPERADOR parse_operador(const char *operador)
 {
     if (operador == NULL) return OP_INVALID;
 
->>>>>>> 2b156907bbaf1caaca3926e16b16dd27569f3b92
-    if (!strcmp(operador, "==")) return OP_EQ;
+    if (!strcmp(operador, "=="))return OP_EQ;
     if (!strcmp(operador, "!=")) return OP_NE;
     if (!strcmp(operador, "<"))  return OP_LT;
     if (!strcmp(operador, "<=")) return OP_LE;
     if (!strcmp(operador, ">"))  return OP_GT;
     if (!strcmp(operador, ">=")) return OP_GE;
-<<<<<<< HEAD
-    return OP_INVALID;
-}
-=======
-
     return OP_INVALID;
 }
 
@@ -244,4 +228,3 @@ bool apply_filter(const ITEM *item, const FILTER *filter)
             return false;
     }
 }
->>>>>>> 2b156907bbaf1caaca3926e16b16dd27569f3b92

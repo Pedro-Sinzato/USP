@@ -392,4 +392,3 @@ extern bool apply_filters(const ITEM *item, const QUERY *query)
 
     return true;
 }
-
