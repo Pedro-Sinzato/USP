@@ -357,4 +357,20 @@ extern const FILTER *query_get_filter(const QUERY *query, int i)
 
     return query->filters[i];
 }
+// olha se o item satisfaz todas condicoes do FILTRO da consulta
+extern bool apply_filters(const ITEM *item, const QUERY *query)
+{
+    if (item == NULL || query == NULL)
+        return false;
+
+    for (int i = 0; i < query_n_filters(query); i++)
+    {
+        const FILTER *filter = query_get_filter(query, i);
+
+        if (!apply_filter(item, filter))
+            return false;
+    }
+
+    return true;
+}
 
