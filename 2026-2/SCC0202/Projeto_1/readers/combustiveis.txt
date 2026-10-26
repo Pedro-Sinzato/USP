@@ -1,0 +1,16 @@
+regiao|string
+estado|string
+municipio|string
+revenda|string
+CNPJ|string
+nome_rua|string
+n_rua|string
+complemento|string
+bairro|sitrng
+cep|string
+produto|string
+d_coleta|string
+v_venda|double
+v_compra|double
+u_medida|string
+bandeira|string
