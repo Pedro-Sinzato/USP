@@ -6,6 +6,7 @@
 
 typedef enum datatype
 {
+    ITEM_INVALID = -1,
     ITEM_INT,
     ITEM_DOUBLE,
     ITEM_CHAR,
