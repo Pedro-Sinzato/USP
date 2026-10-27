@@ -5,22 +5,6 @@
 
 typedef struct orthogonal_list CROSS_LIST;
 
-/*
-Comentarios para os devs (retirar antes da entrega)
-
-Como as listas podem ser ordenadas com base em nomes (strings), datas (ou outros numericos), ou flags booleanas (como se e evento futuro)
-a lista usa um enumerador do item.h (DATATYPE) para poder saber qual tipo e comparacao fazer quando for inserir ordenadamente
-
-Como os FIELD do ITEM nao tem identificador, so tipo e conteudo, a gente provavelmente vai ter q implementar um campo de string nome ou algum
-outro identificador para que uma organizacao por campo especifico seja possivel, pq por enquanto eu to implementando de um jeito q eu acho
-q e mais facil e explicar por meio de um exemplo:
-O usuario quer procurar um item a partir de uma key string
-o programa vai percorrer uma das listas (lista-linha ou lista coluna baseado no listIndicator) e ir comparando o primeiro FIELD de DATATYPE
-String e comparar com esse. O problema disso e q n da pra diferenciar multiplos FIELDs de tipo string pq n tem nada q diferencia eles. Entao
-um nome ou codinome sao indistinguiveis e n da pra eu fazer uma busca/insercao baseada em um campo especificado na query, apenas baseado em
-tipos e portanto eu uso o primeiro FIELD do tipo indicado encontrado no array de FIELDs no item
-*/
-
 
 /**
  * @brief Cria CROSS_LIST
@@ -69,7 +53,6 @@ bool remove_search(CROSS_LIST *linked_list, void *key, DATATYPE keyType, int lis
  * @return TRUE se conseguir e FALSE se não conseguir ou se o listIndicator for invalido.
  bool remove_end(CROSS_LIST *cross_list, int listIndicator);
  */
-
 
 
 /**

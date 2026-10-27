@@ -33,7 +33,6 @@ que e informado com base no enumerador datatype (dos arquivos item)
 #include <string.h>
 
 #include "orthogonal_list.h"
-#include "../camposNasa.h"
 #include "item.h"
 
 struct node
@@ -127,12 +126,10 @@ bool delete_cross_list(CROSS_LIST **cross_list)
         free(current);
 
         current = next;
-        next = current->next;
         
-        if(next == NULL) //se encontrar NULL no proximo tem uma chance da variavel len ter quebrado, isso e apeans uma redundancia
+        if(current != NULL)
         {
-            printf("possivel erro na delecao da lista cruzada");
-            break;
+            next = current->next;
         }
     }
     (*cross_list)->lineStart = NULL; //completa a liberacao da lista-linha
@@ -159,12 +156,10 @@ bool delete_cross_list(CROSS_LIST **cross_list)
         free(current);
 
         current = next;
-        next = current->next;
         
-        if(next == NULL) //se encontrar NULL no proximo tem uma chance da variavel len ter quebrado, isso e apeans uma redundancia
+        if(current != NULL)
         {
-            printf("possivel erro na delecao da lista cruzada"); //isso pode indicar um erro na variavel len ou em algum ponteiro ao longo da lista
-            return false;
+            next = current->next;
         }
     }
     (*cross_list)->columnStart = NULL; //completa a liberacao da lista-coluna
@@ -286,7 +281,7 @@ bool add_item(CROSS_LIST *cross_list, ITEM* item)
                     break; //if the program reaches here, it has placed the item, so the loop isnt necessary anymore
                 }
                 
-                if(*((bool*)get_field_content(item, cross_list->lineSortingField)) == false) //if the item is false it is to be placed at the end of the list
+                if(i == (cross_list->len - 1)) //if the item is false or there are only true items in the list it is to be placed at the end of the list
                 {
                     aux->next = noLinha;
                     noLinha->previous = aux;
@@ -428,7 +423,7 @@ bool add_item(CROSS_LIST *cross_list, ITEM* item)
                     break; //if the program reaches here, it has placed the item, so the loop isnt necessary anymore
                 }
                 
-                if(*((bool*)get_field_content(item, cross_list->columnSortingField)) == false) //if the item is false it is to be placed at the end of the list
+                if(i == (cross_list->len - 1)) //if the item is false or there are only true items in the list it is to be placed at the end of the list
                 {
                     aux->next = noColuna;
                     noColuna->previous = aux;
