@@ -34,7 +34,7 @@ que e informado com base no enumerador datatype (dos arquivos item)
 
 #include "orthogonal_list.h"
 #include "../camposNasa.h"
-#include "item.c"
+#include "item.h"
 
 struct node
 {
@@ -59,9 +59,6 @@ struct orthogonal_list
 CROSS_LIST *create_cross_list(int lineCriteria, int columnCriteria);
 bool delete_cross_list(CROSS_LIST **cross_list);
 bool add_item(CROSS_LIST *cross_list, ITEM* item);
-bool remove_start(CROSS_LIST *cross_list, int listIndicator);
-bool remove_search(CROSS_LIST *linked_list, void *key, DATATYPE keyType, int listIndicator);
-bool remove_end(CROSS_LIST *cross_list, int listIndicator);
 ITEM *search(CROSS_LIST *linked_list, void *key, int field);
 
 
@@ -239,9 +236,9 @@ bool add_item(CROSS_LIST *cross_list, ITEM* item)
             //check field, then determine where to put it, then adjust the connecting pointers
             
             //pega qual tipo de comparacao usar
-            if((int)(cross_list->lineSortingField) >= 0 && (int)(cross_list->lineSortingField) <= 4)
+            if(item_get_type(item, cross_list->lineSortingField) == ITEM_STRING)
             { //comparing strings (strcmp)
-                if(strcmp(aux->item->fields[cross_list->lineSortingField].v.s, item->fields[cross_list->lineSortingField].v.s) <= 0)
+                if(strcmp((char*)get_field_content(aux->item, cross_list->lineSortingField), (char*)get_field_content(item, cross_list->lineSortingField)) <= 0)
                 {// if the item of the position we are inspecting is bigger than the item to be inserted, we position our new node behind it
                     noLinha->next = aux;
                     if(i == 0) //if the item is to be placed behind the current first node;
@@ -268,10 +265,10 @@ bool add_item(CROSS_LIST *cross_list, ITEM* item)
                     break; //if the program reaches here, it has placed the item, so the loop isnt necessary anymore
                 }
             }
-            else if ((int)(cross_list->lineSortingField) >= 5 && (int)(cross_list->lineSortingField) <= 7)
+            else if (item_get_type(item, cross_list->lineSortingField) == ITEM_BOOL)
             {//comparing boolean (true goes first, false goes later)
-                if(aux->item->fields[cross_list->lineSortingField].v.b == false &&
-                     item->fields[cross_list->lineSortingField].v.b == true) //
+                if(*((bool*)get_field_content(aux->item, cross_list->lineSortingField)) == false &&
+                     *((bool*)get_field_content(item, cross_list->lineSortingField)) == true) //
                 {// if the item of the position we are inspecting is false and the item is true, we position our new node behind it, in the border between the true and the false
                     noLinha->next = aux;
                     if(i == 0) //if the item is to be placed behind the current first node;
@@ -289,7 +286,7 @@ bool add_item(CROSS_LIST *cross_list, ITEM* item)
                     break; //if the program reaches here, it has placed the item, so the loop isnt necessary anymore
                 }
                 
-                if(item->fields[cross_list->lineSortingField].v.b == false) //if the item is false it is to be placed at the end of the list
+                if(*((bool*)get_field_content(item, cross_list->lineSortingField)) == false) //if the item is false it is to be placed at the end of the list
                 {
                     aux->next = noLinha;
                     noLinha->previous = aux;
@@ -299,9 +296,9 @@ bool add_item(CROSS_LIST *cross_list, ITEM* item)
                 }   
             }
             //comparing numeric
-            else if((int)cross_list->lineSortingField >= 8 && (int)cross_list->lineSortingField <= 11)
+            else if(item_get_type(item, cross_list->lineSortingField) == ITEM_INT)
             {//if its an integer
-                if(aux->item->fields[cross_list->lineSortingField].v.i > item->fields[cross_list->lineSortingField].v.i)
+                if(*((int*)get_field_content(aux->item, cross_list->lineSortingField)) > *((int*)get_field_content(item, cross_list->lineSortingField)))
                 {// if the item of the position we are inspecting is bigger than the item to be inserted, we position our new node behind it
                     noLinha->next = aux;
                     if(i == 0) //if the item is to be placed behind the current first node;
@@ -328,9 +325,9 @@ bool add_item(CROSS_LIST *cross_list, ITEM* item)
                     break; //if the program reaches here, it has placed the item, so the loop isnt necessary anymore
                 }
             }
-            else if ((int)cross_list->lineSortingField >= 12 && (int)cross_list->lineSortingField <= 19)
+            else if (item_get_type(item, cross_list->lineSortingField) == ITEM_DOUBLE)
             {//if its a double
-                if(aux->item->fields[cross_list->lineSortingField].v.d > item->fields[cross_list->lineSortingField].v.d)
+                if(*((double*)get_field_content(aux->item, cross_list->lineSortingField)) > *((double*)get_field_content(item, cross_list->lineSortingField)))
                 {// if the item of the position we are inspecting is bigger than the item to be inserted, we position our new node behind it
                     noLinha->next = aux;
                     if(i == 0) //if the item is to be placed behind the current first node;
@@ -381,9 +378,9 @@ bool add_item(CROSS_LIST *cross_list, ITEM* item)
             //check field, then determine where to put it, then adjust the connecting pointers
             
             //pega qual tipo de comparacao usar
-            if((int)(cross_list->columnSortingField) >= 0 && (int)(cross_list->columnSortingField) <= 4)
+            if(item_get_type(item, cross_list->columnSortingField) == ITEM_STRING)
             { //comparing strings (strcmp)
-                if(strcmp(aux->item->fields[cross_list->columnSortingField].v.s, item->fields[cross_list->columnSortingField].v.s) <= 0)
+                if(strcmp((char*)get_field_content(aux->item, cross_list->columnSortingField), (char*)get_field_content(item, cross_list->columnSortingField)) <= 0)
                 {// if the item of the position we are inspecting is bigger than the item to be inserted, we position our new node behind it
                     noColuna->next = aux;
                     if(i == 0) //if the item is to be placed behind the current first node;
@@ -410,10 +407,10 @@ bool add_item(CROSS_LIST *cross_list, ITEM* item)
                     break; //if the program reaches here, it has placed the item, so the loop isnt necessary anymore
                 }
             }
-            else if ((int)(cross_list->columnSortingField) >= 5 && (int)(cross_list->columnSortingField) <= 7)
+            else if (item_get_type(item, cross_list->columnSortingField) == ITEM_BOOL)
             {//comparing boolean (true goes first, false goes later)
-                if(aux->item->fields[cross_list->columnSortingField].v.b == false &&
-                     item->fields[cross_list->columnSortingField].v.b == true) //
+                if(*((bool*)get_field_content(aux->item, cross_list->columnSortingField)) == false &&
+                     *((bool*)get_field_content(item, cross_list->columnSortingField)) == true) //
                 {// if the item of the position we are inspecting is false and the item is true, we position our new node behind it, in the border between the true and the false
                     noColuna->next = aux;
                     if(i == 0) //if the item is to be placed behind the current first node;
@@ -431,7 +428,7 @@ bool add_item(CROSS_LIST *cross_list, ITEM* item)
                     break; //if the program reaches here, it has placed the item, so the loop isnt necessary anymore
                 }
                 
-                if(item->fields[cross_list->columnSortingField].v.b == false) //if the item is false it is to be placed at the end of the list
+                if(*((bool*)get_field_content(item, cross_list->columnSortingField)) == false) //if the item is false it is to be placed at the end of the list
                 {
                     aux->next = noColuna;
                     noColuna->previous = aux;
@@ -441,9 +438,9 @@ bool add_item(CROSS_LIST *cross_list, ITEM* item)
                 }   
             }
             //comparing numeric
-            else if((int)cross_list->columnSortingField >= 8 && (int)cross_list->columnSortingField <= 11)
+            else if(item_get_type(item, cross_list->columnSortingField) == ITEM_INT)
             {//if its an integer
-                if(aux->item->fields[cross_list->columnSortingField].v.i > item->fields[cross_list->columnSortingField].v.i)
+                if(*((int*)get_field_content(aux->item, cross_list->columnSortingField)) > *((int*)get_field_content(item, cross_list->columnSortingField)))
                 {// if the item of the position we are inspecting is bigger than the item to be inserted, we position our new node behind it
                     noColuna->next = aux;
                     if(i == 0) //if the item is to be placed behind the current first node;
@@ -470,9 +467,9 @@ bool add_item(CROSS_LIST *cross_list, ITEM* item)
                     break; //if the program reaches here, it has placed the item, so the loop isnt necessary anymore
                 }
             }
-            else if ((int)cross_list->columnSortingField >= 12 && (int)cross_list->columnSortingField <= 19)
+            else if (item_get_type(item, cross_list->columnSortingField) == ITEM_DOUBLE)
             {//if its a double
-                if(aux->item->fields[cross_list->columnSortingField].v.d > item->fields[cross_list->columnSortingField].v.d)
+                if(*((double*)get_field_content(aux->item, cross_list->columnSortingField)) > *((double*)get_field_content(item, cross_list->columnSortingField)))
                 {// if the item of the position we are inspecting is bigger than the item to be inserted, we position our new node behind it
                     noColuna->next = aux;
                     if(i == 0) //if the item is to be placed behind the current first node;
@@ -564,31 +561,31 @@ ITEM *search(CROSS_LIST *cross_list, void *key, int field)
         }
 
         //valid for asteroid only
-        if(field >= 0 && field <= 4)
+        if(item_get_type(aux->item, field) == ITEM_STRING)
         { //looking for string (strcmp) - returns the first item found with the same string in the designated field
-            if(strcmp(aux->item->fields[field].v.s, *((char**)key)) == 0)
+            if(strcmp((char*)get_field_content(aux->item, field), *((char**)key)) == 0)
             {
                 return aux->item;
             }
         }
-        else if (field >= 5 && field <= 7)
+        else if (item_get_type(aux->item, field) == ITEM_BOOL)
         {//looking for boolean - returns the first item found with the same boolean value in the designated field
-            if(aux->item->fields[field].v.b == *((bool*)key))
+            if(*((bool*)get_field_content(aux->item, field)) == *((bool*)key))
             {
                 return aux->item;
             }   
         }
         //comparing numeric
-        else if(field >= 8 && field <= 11)
+        else if(item_get_type(aux->item, field) == ITEM_INT)
         {//looking for an integer  - returns the first item found with the equivalent int value in the designated field
-            if(aux->item->fields[field].v.i == *((int*)key))
+            if(*((int*)get_field_content(aux->item, field)) == *((int*)key))
             {
                 return aux->item;
             }
         }
-        else if (field >= 12 && field <= 19)
+        else if (item_get_type(aux->item, field) == ITEM_DOUBLE)
         {//looking for a double  - returns the first item found with the equivalent double value in the designated field
-            if(aux->item->fields[field].v.d == *((double*)key))
+            if(*((double*)get_field_content(aux->item, field)) == *((double*)key))
             {
                 return aux->item;
             }
