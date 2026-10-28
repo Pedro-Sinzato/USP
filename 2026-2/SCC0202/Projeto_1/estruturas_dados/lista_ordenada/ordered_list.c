@@ -23,13 +23,6 @@ struct ordered_list
     int len;
 };
 
-
-//prototipos
-ORDERED_LIST *create_ordered_list(void);
-bool delete_ordered_list(ORDERED_LIST **ordered_list);
-bool add_item(ORDERED_LIST *ordered_list, ITEM* item);
-ITEM *search(ORDERED_LIST *ordered_list, void *key, int field);
-
 static bool order_list_destroy(ED **self)
 {
     if (self == NULL || *self == NULL)
@@ -46,7 +39,7 @@ static bool order_list_destroy(ED **self)
 
 static bool ordered_list_insert_ed(ED *self, ITEM *item)
 {
-    return add_item((ORDERED_LIST *)self, item);
+    return ordered_list_add_item((ORDERED_LIST *)self, item);
 }
 
 static void ordered_list_for_each(const ED *self, ED_VISIT visit, void *ctx)
@@ -62,7 +55,7 @@ static void ordered_list_for_each(const ED *self, ED_VISIT visit, void *ctx)
     }
 }
 
-static const ED_VTABLE query_vtable =
+static const ED_VTABLE order_list_vtable =
 {
     order_list_destroy,
     ordered_list_insert_ed,
@@ -76,7 +69,7 @@ static const ED_VTABLE query_vtable =
  * @param[in] INT que indica a posicao do campo no vetor FIELDS do item usado para a ordenacao das lista
  * @return Ponteiro para a ORDERED_LIST ou NULL no caso de erros.
  */
-ORDERED_LIST *create_ordered_list(void) //Colocar de volta o critério de Sorting
+extern ORDERED_LIST *create_ordered_list(void) //Colocar de volta o critério de Sorting
 {
     int sortingCriteria = 0; //Apagar
     ORDERED_LIST* ordered_list = (ORDERED_LIST*)malloc(sizeof(ORDERED_LIST));
@@ -89,6 +82,7 @@ ORDERED_LIST *create_ordered_list(void) //Colocar de volta o critério de Sortin
 
     ordered_list->len = 0;
     ordered_list->start = NULL;
+    ordered_list->base.ed_vtable = &order_list_vtable;
     ordered_list->sortingCriteria = sortingCriteria;
 
     return ordered_list;
@@ -154,7 +148,7 @@ bool delete_ordered_list(ORDERED_LIST **ordered_list)
  * @param[in] endereço do item a ser inserido na lista.
  * @return TRUE se conseguir e FALSE se não conseguir (Lembrando que se o item nao tiver o field [campo do tipo x] usado na ordenacao da lista, isso leva a um erro).
  */
-bool add_item(ORDERED_LIST *ordered_list, ITEM* item)
+bool ordered_list_add_item(ORDERED_LIST *ordered_list, ITEM *item)
 {
     if(ordered_list == NULL || item == NULL)
     {
@@ -331,7 +325,7 @@ bool add_item(ORDERED_LIST *ordered_list, ITEM* item)
  * @param[in] field - int que indica em qual campo o valor de key esta localizado.
  * @return Ponteiro para ITEM, NULL em caso de erros (lista/item inexistente ou nao encontrado, tipo de campo invalido, etc).
  */
-ITEM *search(ORDERED_LIST *ordered_list, void *key, int field)
+ITEM *ordered_list_search(ORDERED_LIST *ordered_list, void *key, int field)
 {
     NODE* aux = ordered_list->start;
 

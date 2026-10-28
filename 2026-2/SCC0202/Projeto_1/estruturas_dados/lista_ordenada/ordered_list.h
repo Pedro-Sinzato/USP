@@ -1,5 +1,5 @@
-#ifndef LISTA_CRUZADA_H
-#define LISTA_CRUZADA_H
+#ifndef ORDERED_LIST_H
+#define ORDERED_LIST_H
 
 #include "../item.h"
 
@@ -11,7 +11,7 @@ typedef struct node NODE;
  * @param[in] INT que indica a posicao do campo no vetor FIELDS do item usado para a ordenacao das lista
  * @return Ponteiro para a ORDERED_LIST ou NULL no caso de erros.
  */
-ORDERED_LIST *create_ordered_list(void);
+extern ORDERED_LIST *create_ordered_list(void);
 
 /**
  * @brief Deleta ORDERED_LIST
@@ -26,7 +26,7 @@ bool delete_ordered_list(ORDERED_LIST **ordered_list);
  * @param[in] endereço do item a ser inserido na lista.
  * @return TRUE se conseguir e FALSE se não conseguir (Lembrando que se o item nao tiver o field [campo do tipo x] usado na ordenacao da lista, isso leva a um erro).
  */
-bool add_item(ORDERED_LIST *ordered_list, ITEM* item);
+bool ordered_list_add_item(ORDERED_LIST *l, ITEM *item);
 
 /** As funcoes de remocao foram removidas por obsolecencia */
 
@@ -38,6 +38,6 @@ bool add_item(ORDERED_LIST *ordered_list, ITEM* item);
  * @param[in] field - int que indica em qual campo o valor de key esta localizado.
  * @return Ponteiro para ITEM, NULL em caso de erros (lista/item inexistente ou nao encontrado, tipo de campo invalido, etc).
  */
-ITEM *search(ORDERED_LIST *ordered_list, void *key, int field);
+ITEM *ordered_list_search(ORDERED_LIST *l, void *key, int field);
 
 #endif
