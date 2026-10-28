@@ -1,91 +1,115 @@
-#ifndef ESTRUTURAS_DADOS_H
-#define ESTRUTURAS_DADOS_H
+#include <stddef.h>
+#include <stdio.h>
+#include <string.h>
 
-#include <stdbool.h>
+#include "estruturas_dados.h"
+#include "item.h"
+#include "lista_cruzada/orthogonal_list.h"
+#include "query/query.h"
+#include "stack/stack.h"
+#include "lista_cabeca/lista_cabeca.h"
+#include "linked_list/linked_list.h"
 
-#include "../estruturas_dados/item.h"
+/* ---------- nomes <-> tipos ---------- */
 
-typedef enum estrutura_dados_types
+static const struct
 {
-    PILHA,
-    FILA,
-    LISTA_SEQ,
-    LISTA_ENC,
-    LISTA_CABECA,
-    LISTA_ORD,
-    LISTA_GEN,
-    LISTA_CRUZ
-} ED_TYPES;
-
-/* Basicamente implementando C++ manualmente em C: ver vtable */
-
-typedef struct ed_vtable ED_VTABLE;
-typedef struct estrutura_dados ED;
-
-/* Chamada para cada ITEM durante o percurso; devolva false para parar. */
-typedef bool (*ED_VISIT)(const ITEM *item, void *ctx);
-
-struct ed_vtable
-{
-    bool (*destroy_ed)(ED **self);
-    bool (*insert_ed)(ED *self, ITEM *item);
-    void (*for_each_ed)(const ED *self, ED_VISIT visit, void *ctx);
+    const char *name;
+    ED_TYPES type;
+} ED_NAMES[] = {
+    {"pilha", PILHA},
+    {"fila", FILA},
+    {"lista_seq", LISTA_SEQ},
+    {"lista_enc", LISTA_ENC},
+    {"lista_cabeca", LISTA_CABECA},
+    {"lista_ord", LISTA_ORD},
+    {"lista_gen", LISTA_GEN},
+    {"lista_cruz", LISTA_CRUZ},
 };
 
-/*
- * Toda estrutura concreta (STACK, QUERY, ...) deve ter um ED como PRIMEIRO
- * membro, para que o cast entre ED * e o tipo concreto seja válido.
- */
-struct estrutura_dados
+ED_TYPES ed_type_from_name(const char *name)
 {
-    const ED_VTABLE *ed_vtable;
-    ED_TYPES ed_types;
-};
+    if (name != NULL)
+    {
+        for (size_t i = 0; i < sizeof ED_NAMES / sizeof ED_NAMES[0]; i++)
+        {
+            if (strcmp(name, ED_NAMES[i].name) == 0)
+                return ED_NAMES[i].type;
+        }
+    }
+    return ED_INVALID; /* precisa ser adicionado ao enum em estruturas_dados.h */
+}
 
-/* Funções genéricas */
+/* ---------- fábrica ---------- */
 
-/**
- * @brief Converte o nome recebido em -base no ED_TYPES correspondente.
- * Nomes: pilha, fila, lista_seq, lista_enc, lista_cabeca, lista_ord,
- * lista_gen, lista_cruz.
- * @param[in] name Nome recebido em -base.
- * @return O ED_TYPES correspondente.
- */
-extern ED_TYPES ed_type_from_name(const char *name);
+ED *create_ed(ED_TYPES type)
+{
+    switch (type)
+    {
+    case PILHA:
+        return (ED *)create_stack();
+    case FILA:
+        return (ED *)create_query();
+    case LISTA_SEQ:
+    case LISTA_ENC:
+        return (ED *)create_linked_list();
+    case LISTA_CABECA:
+        return (ED *)create_lista_cabeca();
+    case LISTA_ORD:
+    case LISTA_GEN:
+    case LISTA_CRUZ:
+        return (ED *)create_cross_list();
+    default:
+        return NULL;
+    }
+}
 
-/**
- * @brief Cria a estrutura de dados do tipo pedido.
- * @param[in] type Tipo da estrutura (PILHA, FILA, ...).
- * @return Ponteiro para a estrutura, ou NULL se o tipo ainda não foi
- * implementado ou faltou memória.
- */
-extern ED *create_ed(ED_TYPES type);
+/* ---------- despacho pela vtable ---------- */
 
-/**
- * @brief Apaga a estrutura e todos os ITEMs que ainda estiverem nela.
- * @param[in,out] self Endereço do ponteiro da estrutura; vira NULL ao final.
- * @return true se conseguiu (ou se não havia estrutura), false caso contrário.
- */
-extern bool destroy_ed(ED **self);
+bool destroy_ed(ED **self)
+{
+    if (self == NULL || *self == NULL)
+        return true;
 
-/**
- * @brief Insere o ITEM na estrutura (a estrutura passa a ser dona dele).
- * @param[in,out] self Ponteiro para a estrutura.
- * @param[in] item Ponteiro para o ITEM a inserir.
- * @return true se conseguiu, false caso contrário.
- */
-extern bool insert_ed(ED *self, ITEM *item);
+    if ((*self)->ed_vtable == NULL || (*self)->ed_vtable->destroy_ed == NULL)
+        return false;
 
-/* Imprime a estrutura, qualquer que seja o tipo (para depuração; apagar depois). */
-extern void print_ed(const ED *self);
+    /* A função concreta libera tudo e põe *self em NULL. */
+    return (*self)->ed_vtable->destroy_ed(self);
+}
 
-/**
- * @brief Percorre os ITEMs da estrutura, sem alterá-la, chamando visit para
- * cada um até acabarem ou visit devolver false.
- * @param[in] self Ponteiro para a estrutura.
- * @param[in] visit Função chamada para cada ITEM.
- * @param[in,out] ctx Ponteiro repassado a visit (estado do chamador).
- */
-extern void for_each_ed(const ED *self, ED_VISIT visit, void *ctx);
+bool insert_ed(ED *self, ITEM *item)
+{
+    if (self == NULL || item == NULL)
+        return false;
 
-#endif
+    if (self->ed_vtable == NULL || self->ed_vtable->insert_ed == NULL)
+        return false;
+
+    return self->ed_vtable->insert_ed(self, item);
+}
+
+void for_each_ed(const ED *self, ED_VISIT visit, void *ctx)
+{
+    if (self == NULL || visit == NULL)
+        return;
+
+    if (self->ed_vtable == NULL || self->ed_vtable->for_each_ed == NULL)
+        return;
+
+    self->ed_vtable->for_each_ed(self, visit, ctx);
+}
+
+/* ---------- depuração ---------- */
+
+static bool print_visit(const ITEM *item, void *ctx)
+{
+    (void)ctx;
+    item_print(item);
+    return true;
+}
+
+void print_ed(const ED *self)
+{
+    for_each_ed(self, print_visit, NULL);
+}
