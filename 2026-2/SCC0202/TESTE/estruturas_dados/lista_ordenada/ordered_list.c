@@ -3,22 +3,21 @@
 #include <stdbool.h>
 #include <string.h>
 
-
 #include "../item.h"
 #include "ordered_list.h"
 #include "../estruturas_dados.h"
 
 struct node
 {
-    ITEM* item;
-    NODE* previous;
-    NODE* next;
+    ITEM *item;
+    NODE *previous;
+    NODE *next;
 };
 
 struct ordered_list
 {
     ED base;
-    NODE* start;
+    NODE *start;
     DATATYPE sortingCriteria;
     int len;
 };
@@ -56,25 +55,24 @@ static void ordered_list_for_each(const ED *self, ED_VISIT visit, void *ctx)
 }
 
 static const ED_VTABLE order_list_vtable =
-{
-    order_list_destroy,
-    ordered_list_insert_ed,
-    ordered_list_for_each
-};
+    {
+        order_list_destroy,
+        ordered_list_insert_ed,
+        ordered_list_for_each};
 
-//funcoes
+// funcoes
 
 /**
  * @brief Cria ORDERED_LIST
  * @param[in] INT que indica a posicao do campo no vetor FIELDS do item usado para a ordenacao das lista
  * @return Ponteiro para a ORDERED_LIST ou NULL no caso de erros.
  */
-extern ORDERED_LIST *create_ordered_list(void) //Colocar de volta o critério de Sorting
+extern ORDERED_LIST *create_ordered_list(void) // Colocar de volta o critério de Sorting
 {
-    int sortingCriteria = 0; //Apagar
-    ORDERED_LIST* ordered_list = (ORDERED_LIST*)malloc(sizeof(ORDERED_LIST));
+    int sortingCriteria = 0; // Apagar
+    ORDERED_LIST *ordered_list = (ORDERED_LIST *)malloc(sizeof(ORDERED_LIST));
 
-    if(ordered_list == NULL)
+    if (ordered_list == NULL)
     {
         printf("Falha na alocacao da lista cruzada");
         return NULL;
@@ -95,30 +93,30 @@ extern ORDERED_LIST *create_ordered_list(void) //Colocar de volta o critério de
  */
 bool delete_ordered_list(ORDERED_LIST **ordered_list)
 {
-    if(ordered_list == NULL || *ordered_list == NULL)
+    if (ordered_list == NULL || *ordered_list == NULL)
     {
         printf("ponteiro de lista ordenada invalido para delecao");
         return false;
     }
 
-   NODE *current, *next;
-   current = (*ordered_list)->start;
-   next = current->next;
+    NODE *current, *next;
+    current = (*ordered_list)->start;
+    next = current->next;
 
     for (int i = 0; i < (*ordered_list)->len; i++)
     {
-        if(current == NULL) //redundancia caso o len tenha quebrado
+        if (current == NULL) // redundancia caso o len tenha quebrado
         {
             printf("possivel erro na delecao da lista cruzada");
             break;
         }
 
-        if(current->previous != NULL) //se tiver antecessor, tira os ponteiros nas duas direcoes
+        if (current->previous != NULL) // se tiver antecessor, tira os ponteiros nas duas direcoes
         {
             current->previous->next = NULL;
             current->previous = NULL;
         }
-        if(current->next != NULL) //se tiver sucessor, tira os ponteiros nas duas direcoes
+        if (current->next != NULL) // se tiver sucessor, tira os ponteiros nas duas direcoes
         {
             current->next->previous = NULL;
             current->next = NULL;
@@ -129,17 +127,16 @@ bool delete_ordered_list(ORDERED_LIST **ordered_list)
 
         current = next;
 
-        if(current != NULL)
+        if (current != NULL)
         {
             next = current->next;
         }
     }
     (*ordered_list)->start = NULL;
-    free((*ordered_list)); //libera a estrutura principal e tira ponteiro pendente
+    free((*ordered_list)); // libera a estrutura principal e tira ponteiro pendente
     ordered_list = NULL;
 
     return true;
-
 }
 
 /**
@@ -150,43 +147,43 @@ bool delete_ordered_list(ORDERED_LIST **ordered_list)
  */
 bool ordered_list_add_item(ORDERED_LIST *ordered_list, ITEM *item)
 {
-    if(ordered_list == NULL || item == NULL)
+    if (ordered_list == NULL || item == NULL)
     {
         printf("Item ou lista ordenada invalidas para insercao");
         return false;
     }
 
-    NODE* no = (NODE*)malloc(sizeof(NODE));
+    NODE *no = (NODE *)malloc(sizeof(NODE));
     no->item = item;
 
-    //caso de insercao caso nenhuma das duas listas tenha itens
-    if(ordered_list->len == 0)
+    // caso de insercao caso nenhuma das duas listas tenha itens
+    if (ordered_list->len == 0)
     {
         ordered_list->start = no;
         no->next = NULL;
         no->previous = NULL;
     }
-    else //insercao padrao
+    else // insercao padrao
     {
-        NODE* aux; //ponteiro que vai ajudar a determinar em qual posicao inserir
+        NODE *aux; // ponteiro que vai ajudar a determinar em qual posicao inserir
 
-        //insercao na lista-linha
+        // insercao na lista-linha
         aux = ordered_list->start;
 
-        for(int i = 0; i < ordered_list->len; i++)//cicles item per item, checking where the node should be placed
+        for (int i = 0; i < ordered_list->len; i++) // cicles item per item, checking where the node should be placed
         {
-            if(aux == NULL) //would indicate a possible error
+            if (aux == NULL) // would indicate a possible error
             {
                 break;
             }
 
-            //pega qual tipo de comparacao usar
-            if(item_get_type(item, ordered_list->sortingCriteria) == ITEM_STRING)
-            { //comparing strings (strcmp)
-                if(strcmp((char*)get_field_content(aux->item, ordered_list->sortingCriteria), (char*)get_field_content(item, ordered_list->sortingCriteria)) <= 0)
-                {// if the item of the position we are inspecting is bigger than the item to be inserted, we position our new node behind it
+            // pega qual tipo de comparacao usar
+            if (item_get_type(item, ordered_list->sortingCriteria) == ITEM_STRING)
+            { // comparing strings (strcmp)
+                if (strcmp((char *)get_field_content(aux->item, ordered_list->sortingCriteria), (char *)get_field_content(item, ordered_list->sortingCriteria)) <= 0)
+                { // if the item of the position we are inspecting is bigger than the item to be inserted, we position our new node behind it
                     no->next = aux;
-                    if(i == 0) //if the item is to be placed behind the current first node;
+                    if (i == 0) // if the item is to be placed behind the current first node;
                     {
                         no->previous = NULL;
                         ordered_list->start = no;
@@ -198,25 +195,25 @@ bool ordered_list_add_item(ORDERED_LIST *ordered_list, ITEM *item)
                     }
                     aux->previous = no;
 
-                    break; //if the program reaches here, it has placed the item, so the loop isnt necessary anymore
+                    break; // if the program reaches here, it has placed the item, so the loop isnt necessary anymore
                 }
 
-                if(i ==(ordered_list->len - 1)) //if the item is to be placed at the end of the list
+                if (i == (ordered_list->len - 1)) // if the item is to be placed at the end of the list
                 {
                     aux->next = no;
                     no->previous = aux;
                     no->next = NULL;
 
-                    break; //if the program reaches here, it has placed the item, so the loop isnt necessary anymore
+                    break; // if the program reaches here, it has placed the item, so the loop isnt necessary anymore
                 }
             }
             else if (item_get_type(item, ordered_list->sortingCriteria) == ITEM_BOOL)
-            {//comparing boolean (true goes first, false goes later)
-                if(*((bool*)get_field_content(aux->item, ordered_list->sortingCriteria)) == false &&
-                     *((bool*)get_field_content(item, ordered_list->sortingCriteria)) == true) //
-                {// if the item of the position we are inspecting is false and the item is true, we position our new node behind it, in the border between the true and the false
+            { // comparing boolean (true goes first, false goes later)
+                if (*((bool *)get_field_content(aux->item, ordered_list->sortingCriteria)) == false &&
+                    *((bool *)get_field_content(item, ordered_list->sortingCriteria)) == true) //
+                {                                                                              // if the item of the position we are inspecting is false and the item is true, we position our new node behind it, in the border between the true and the false
                     no->next = aux;
-                    if(i == 0) //if the item is to be placed behind the current first node;
+                    if (i == 0) // if the item is to be placed behind the current first node;
                     {
                         no->previous = NULL;
                         ordered_list->start = no;
@@ -228,25 +225,25 @@ bool ordered_list_add_item(ORDERED_LIST *ordered_list, ITEM *item)
                     }
                     aux->previous = no;
 
-                    break; //if the program reaches here, it has placed the item, so the loop isnt necessary anymore
+                    break; // if the program reaches here, it has placed the item, so the loop isnt necessary anymore
                 }
 
-                if(i == (ordered_list->len - 1)) //if the item is false or there are only true items in the list it is to be placed at the end of the list
+                if (i == (ordered_list->len - 1)) // if the item is false or there are only true items in the list it is to be placed at the end of the list
                 {
                     aux->next = no;
                     no->previous = aux;
                     no->next = NULL;
 
-                    break; //if the program reaches here, it has placed the item, so the loop isnt necessary anymore
+                    break; // if the program reaches here, it has placed the item, so the loop isnt necessary anymore
                 }
             }
-            //comparing numeric
-            else if(item_get_type(item, ordered_list->sortingCriteria) == ITEM_INT)
-            {//if its an integer
-                if(*((int*)get_field_content(aux->item, ordered_list->sortingCriteria)) > *((int*)get_field_content(item, ordered_list->sortingCriteria)))
-                {// if the item of the position we are inspecting is bigger than the item to be inserted, we position our new node behind it
+            // comparing numeric
+            else if (item_get_type(item, ordered_list->sortingCriteria) == ITEM_INT)
+            { // if its an integer
+                if (*((int *)get_field_content(aux->item, ordered_list->sortingCriteria)) > *((int *)get_field_content(item, ordered_list->sortingCriteria)))
+                { // if the item of the position we are inspecting is bigger than the item to be inserted, we position our new node behind it
                     no->next = aux;
-                    if(i == 0) //if the item is to be placed behind the current first node;
+                    if (i == 0) // if the item is to be placed behind the current first node;
                     {
                         no->previous = NULL;
                         ordered_list->start = no;
@@ -258,24 +255,24 @@ bool ordered_list_add_item(ORDERED_LIST *ordered_list, ITEM *item)
                     }
                     aux->previous = no;
 
-                    break; //if the program reaches here, it has placed the item, so the loop isnt necessary anymore
+                    break; // if the program reaches here, it has placed the item, so the loop isnt necessary anymore
                 }
 
-                if(i ==(ordered_list->len - 1)) //if the item is to be placed at the end of the list
+                if (i == (ordered_list->len - 1)) // if the item is to be placed at the end of the list
                 {
                     aux->next = no;
                     no->previous = aux;
                     no->next = NULL;
 
-                    break; //if the program reaches here, it has placed the item, so the loop isnt necessary anymore
+                    break; // if the program reaches here, it has placed the item, so the loop isnt necessary anymore
                 }
             }
             else if (item_get_type(item, ordered_list->sortingCriteria) == ITEM_DOUBLE)
-            {//if its a double
-                if(*((double*)get_field_content(aux->item, ordered_list->sortingCriteria)) > *((double*)get_field_content(item, ordered_list->sortingCriteria)))
-                {// if the item of the position we are inspecting is bigger than the item to be inserted, we position our new node behind it
+            { // if its a double
+                if (*((double *)get_field_content(aux->item, ordered_list->sortingCriteria)) > *((double *)get_field_content(item, ordered_list->sortingCriteria)))
+                { // if the item of the position we are inspecting is bigger than the item to be inserted, we position our new node behind it
                     no->next = aux;
-                    if(i == 0) //if the item is to be placed behind the current first node;
+                    if (i == 0) // if the item is to be placed behind the current first node;
                     {
                         no->previous = NULL;
                         ordered_list->start = no;
@@ -287,16 +284,16 @@ bool ordered_list_add_item(ORDERED_LIST *ordered_list, ITEM *item)
                     }
                     aux->previous = no;
 
-                    break; //if the program reaches here, it has placed the item, so the loop isnt necessary anymore
+                    break; // if the program reaches here, it has placed the item, so the loop isnt necessary anymore
                 }
 
-                if(i ==(ordered_list->len - 1)) //if the item is to be placed at the end of the list
+                if (i == (ordered_list->len - 1)) // if the item is to be placed at the end of the list
                 {
                     aux->next = no;
                     no->previous = aux;
                     no->next = NULL;
 
-                    break; //if the program reaches here, it has placed the item, so the loop isnt necessary anymore
+                    break; // if the program reaches here, it has placed the item, so the loop isnt necessary anymore
                 }
             }
             else
@@ -305,18 +302,16 @@ bool ordered_list_add_item(ORDERED_LIST *ordered_list, ITEM *item)
                 return false;
             }
 
-            //if it reaches here, it checked the position related to the current node aux is pointing to and the place wasnt aproppriate, so we move onto the next node
+            // if it reaches here, it checked the position related to the current node aux is pointing to and the place wasnt aproppriate, so we move onto the next node
             aux = aux->next;
         }
-
+    }
     ordered_list->len += 1;
 
     return true;
-    }
 }
 
 /** As funcoes de remocao foram removidas por obsolecencia */
-
 
 /**
  * @brief Busca por ITEM correspondente a KEY de ORDERED_LIST.
@@ -327,41 +322,41 @@ bool ordered_list_add_item(ORDERED_LIST *ordered_list, ITEM *item)
  */
 ITEM *ordered_list_search(ORDERED_LIST *ordered_list, void *key, int field)
 {
-    NODE* aux = ordered_list->start;
+    NODE *aux = ordered_list->start;
 
-    for(int i = 0; i < ordered_list->len; i++)
+    for (int i = 0; i < ordered_list->len; i++)
     {
 
-        if(aux == NULL) //would indicate a possible error
+        if (aux == NULL) // would indicate a possible error
         {
             break;
         }
 
-        if(item_get_type(aux->item, field) == ITEM_STRING)
-        { //looking for string (strcmp) - returns the first item found with the same string in the designated field
-            if(strcmp((char*)get_field_content(aux->item, field), *((char**)key)) == 0)
+        if (item_get_type(aux->item, field) == ITEM_STRING)
+        { // looking for string (strcmp) - returns the first item found with the same string in the designated field
+            if (strcmp((char *)get_field_content(aux->item, field), *((char **)key)) == 0)
             {
                 return aux->item;
             }
         }
         else if (item_get_type(aux->item, field) == ITEM_BOOL)
-        {//looking for boolean - returns the first item found with the same boolean value in the designated field
-            if(*((bool*)get_field_content(aux->item, field)) == *((bool*)key))
+        { // looking for boolean - returns the first item found with the same boolean value in the designated field
+            if (*((bool *)get_field_content(aux->item, field)) == *((bool *)key))
             {
                 return aux->item;
             }
         }
-        //comparing numeric
-        else if(item_get_type(aux->item, field) == ITEM_INT)
-        {//looking for an integer  - returns the first item found with the equivalent int value in the designated field
-            if(*((int*)get_field_content(aux->item, field)) == *((int*)key))
+        // comparing numeric
+        else if (item_get_type(aux->item, field) == ITEM_INT)
+        { // looking for an integer  - returns the first item found with the equivalent int value in the designated field
+            if (*((int *)get_field_content(aux->item, field)) == *((int *)key))
             {
                 return aux->item;
             }
         }
         else if (item_get_type(aux->item, field) == ITEM_DOUBLE)
-        {//looking for a double  - returns the first item found with the equivalent double value in the designated field
-            if(*((double*)get_field_content(aux->item, field)) == *((double*)key))
+        { // looking for a double  - returns the first item found with the equivalent double value in the designated field
+            if (*((double *)get_field_content(aux->item, field)) == *((double *)key))
             {
                 return aux->item;
             }
