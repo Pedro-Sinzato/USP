@@ -7,6 +7,7 @@
 
 typedef enum estrutura_dados_types
 {
+    ED_INVALID = -1,
     PILHA,
     FILA,
     LISTA_SEQ,

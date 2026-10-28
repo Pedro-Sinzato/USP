@@ -1,17 +1,18 @@
 #ifndef LISTA_CRUZADA_H
 #define LISTA_CRUZADA_H
 
-#include "item.h"
+#include "../item.h"
 
 typedef struct orthogonal_list CROSS_LIST;
-
+typedef struct node NODE;
 
 /**
  * @brief Cria CROSS_LIST
  * @param[in] INTs que indicam a posicao dos campos no vetor FIELDS do item usados para a ordenacao das linha e coluna respectivamente
  * @return Ponteiro para a CROSS_LIST ou NULL no caso de erros.
  */
-CROSS_LIST *create_cross_list(int lineCriteria, int columnCriteria);
+//Colocar de volta int lineCriteria, int columnCriteria
+CROSS_LIST *create_cross_list(void);
 
 /**
  * @brief Deleta CROSS_LIST
@@ -35,7 +36,7 @@ bool add_item(CROSS_LIST *cross_list, ITEM* item);
  * @param[out] Ponteiro  para a CROSS_LIST.
  * @param[in] numero que indica se o item a ser removido e o primeiro da lista-linha (listIndicator == 0) ou da lista-coluna (listIndicador == 1)
  * @return TRUE se conseguir e FALSE se não conseguir ou se o listIndicator for invalido.
- 
+
 bool remove_start(CROSS_LIST *cross_list, int listIndicator);
 /**
  * @brief Remove ITEM correspondente a KEY de CROSS_LIST.
@@ -44,7 +45,7 @@ bool remove_start(CROSS_LIST *cross_list, int listIndicator);
  * @param[in] keyType - determina qual o tipo do item a ser inserido para que um metodo de comparacao apropriado possa ser usado
  * @param[in] listIndicator - numero que indica se a chave do item a ser removido deve ser procurado a partir da lista-linha (listIndicator == 0) ou da lista-coluna (listIndicador == 1)
  * @return TRUE se conseguir e FALSE se não conseguir ou se o listIndicator for invalido.
- 
+
 bool remove_search(CROSS_LIST *linked_list, void *key, DATATYPE keyType, int listIndicator);
 /**
  * @brief Remove ITEM no fim de LINKED_LIST.

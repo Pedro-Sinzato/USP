@@ -1,29 +1,29 @@
 /*
 Breve descricao do entendimento da lista cruzada e da sua implementacao
-(Esse topico foi discutido previamente com o Rudinei e tambem consultado brevemente por email com o Marcacini) 
+(Esse topico foi discutido previamente com o Rudinei e tambem consultado brevemente por email com o Marcacini)
 
 A representacao de lista cruzada que sera feita aqui pode ser descrita, na pratica, como duas listas encadeadas ordenadas sob criterios
-diferentes de modo que elas podem formar uma representacao bidimensional que representa uma matriz esparsa em que a posicao de vertical 
+diferentes de modo que elas podem formar uma representacao bidimensional que representa uma matriz esparsa em que a posicao de vertical
 e horizontal de um item nessa matriz representa a posicao na ordenacao nas respectivas listas encadeadas ordenadas.
 
-Devido a essa caracteristica, Algumas partes da lista cruzada implementada em aula seram retiradas, como por exemplo os ponteiros para 
-os itens acima (na mesma coluna) e a direita (na mesma linha), pois como a posicao do item na matriz representa sua posicao na ordenacao, 
-nao havera mais de um item por linha ou coluna. 
+Devido a essa caracteristica, Algumas partes da lista cruzada implementada em aula seram retiradas, como por exemplo os ponteiros para
+os itens acima (na mesma coluna) e a direita (na mesma linha), pois como a posicao do item na matriz representa sua posicao na ordenacao,
+nao havera mais de um item por linha ou coluna.
 
-Essa consequencia tambem permite que a lista cruzada cumpra o seu proposito de representar uma  matriz esparca o suficiente a ponto de ela 
-ser ineficiente de ser implementada como uma simples matriz sequencial, pois haveria muitos itens vazios. Considerando que a lista de 
+Essa consequencia tambem permite que a lista cruzada cumpra o seu proposito de representar uma  matriz esparca o suficiente a ponto de ela
+ser ineficiente de ser implementada como uma simples matriz sequencial, pois haveria muitos itens vazios. Considerando que a lista de
 asteroides tem por volta de 89000 itens, uma matriz alocada sequencialmente ocuparia 89000*89000 espacos, com a maior parte desses ficando
 vazios, enquanto essa matriz esparca ocuparia, efetivamente, 89000*2 para os nos das linhas e das colunas + 89000 para a alocacao dos itens,
 que serao apontados pelas duas listas (totalizando 89000*3 itens alocados).
 
-Uma observacao relevante e que, embora na pratica a lista cruzada sera composta por duas listas encadeadas separadas, como isso e uma forma 
+Uma observacao relevante e que, embora na pratica a lista cruzada sera composta por duas listas encadeadas separadas, como isso e uma forma
 de implementacao de uma unica lista cruzada, os itens que sao adicionados e retiradas (caso fosse aplicavel) tem essas operacoes aplicadas nas duas listas simultaneamente
 o que faz com que as listas ordenadas se comportem como uma unica lista. E, alem disso, ambas as listas apontam para os mesmos itens alocados
 uma unica vez, com apenas os nos sendo alocados duas vezes (uma em cada lista) e apontando para esses itens de posicoes diferentes baseado nos
 criterios de ordenacao.
 
-Outra coisa importante sobre a ordenacao em si e que, como a listas listas da lista cruzada serao ordenadas com base nos criterios 
-providenciados no comando CROSS, como indicado no enunciado, as ordenacoes seram feitas via comparacoes com base no criterio providenciado 
+Outra coisa importante sobre a ordenacao em si e que, como a listas listas da lista cruzada serao ordenadas com base nos criterios
+providenciados no comando CROSS, como indicado no enunciado, as ordenacoes seram feitas via comparacoes com base no criterio providenciado
 que e informado com base no enumerador datatype (dos arquivos item)
  */
 
@@ -33,7 +33,8 @@ que e informado com base no enumerador datatype (dos arquivos item)
 #include <string.h>
 
 #include "orthogonal_list.h"
-#include "item.h"
+#include "../item.h"
+#include "../estruturas_dados.h"
 
 struct node
 {
@@ -42,24 +43,62 @@ struct node
     NODE* next;
 };
 
-typedef struct node NODE;
-
 struct orthogonal_list
 {
+    ED base;                 // sempre o primeiro
     NODE* lineStart;
     DATATYPE lineSortingField;
     NODE* columnStart;
     DATATYPE columnSortingField;
-    int len; 
+    int len;
 };
 
-
 //prototipos
-CROSS_LIST *create_cross_list(int lineCriteria, int columnCriteria);
+CROSS_LIST *create_cross_list(void); //Colocar de volta int lineCriteria, int columnCriteria
 bool delete_cross_list(CROSS_LIST **cross_list);
 bool add_item(CROSS_LIST *cross_list, ITEM* item);
 ITEM *search(CROSS_LIST *linked_list, void *key, int field);
 
+//===========================
+static bool l_cruz_destroy(ED **self)
+{
+    if (self == NULL || *self == NULL)
+    {
+        return true;
+    }
+
+    CROSS_LIST *l_cruz = (CROSS_LIST *)*self;
+    bool ok = delete_cross_list(&l_cruz);
+    *self = NULL;
+
+    return ok;
+}
+
+static bool l_cruz_insert_ed(ED *self, ITEM *item)
+{
+    return add_item((CROSS_LIST *)self, item);
+}
+
+static void l_cruz_for_each(const ED *self, ED_VISIT visit, void *ctx)
+{
+    const CROSS_LIST *query = (const CROSS_LIST *)self;
+
+    for (const NODE *linha = query->lineStart; linha != NULL; linha = linha->next)
+    {
+        if (visit(linha->item, ctx) == false)
+        {
+            return;
+        }
+    }
+}
+
+static const ED_VTABLE l_cruz_vtable =
+{
+    l_cruz_destroy,
+    l_cruz_insert_ed,
+    l_cruz_for_each
+};
+//===========================
 
 //funcoes
 
@@ -68,7 +107,8 @@ ITEM *search(CROSS_LIST *linked_list, void *key, int field);
  * @param[in] INTs que indicam a posicao dos campos no vetor FIELDS do item usados para a ordenacao das linha e coluna respectivamente
  * @return Ponteiro para a CROSS_LIST ou NULL no caso de erros.
  */
-CROSS_LIST *create_cross_list(int lineCriteria, int columnCriteria)
+//Colocar de volta int lineCriteria, int columnCriteria
+CROSS_LIST *create_cross_list(void)
 {
     CROSS_LIST* xList = (CROSS_LIST*)malloc(sizeof(CROSS_LIST));
 
@@ -77,7 +117,9 @@ CROSS_LIST *create_cross_list(int lineCriteria, int columnCriteria)
         printf("Falha na alocacao da lista cruzada");
         return xList;
     }
-
+    int lineCriteria = 0; //APAGAR
+    int columnCriteria = 0; //APAGAR
+    xList->base.ed_vtable = &l_cruz_vtable;
     xList->len = 0;
     xList->lineStart = NULL;
     xList->lineSortingField = lineCriteria;
@@ -126,7 +168,7 @@ bool delete_cross_list(CROSS_LIST **cross_list)
         free(current);
 
         current = next;
-        
+
         if(current != NULL)
         {
             next = current->next;
@@ -156,7 +198,7 @@ bool delete_cross_list(CROSS_LIST **cross_list)
         free(current);
 
         current = next;
-        
+
         if(current != NULL)
         {
             next = current->next;
@@ -204,12 +246,12 @@ bool add_item(CROSS_LIST *cross_list, ITEM* item)
         noLinha->next = NULL;
         noLinha->previous = NULL;
         noColuna->next = NULL;
-        noColuna->previous = NULL;  
+        noColuna->previous = NULL;
     }
     else //insercao padrao
     {
         /*A implementacao ordenada vai ser relativamente simples, quando for inserir um item
-        o algoritmo vai so ir checando item a item se o campo especificado e o outro, se sim, 
+        o algoritmo vai so ir checando item a item se o campo especificado e o outro, se sim,
         passa para a proxima posicao
         como nao foi estabelecido como ordenar (crecente, decrescente, alfabetico, inverso, etc)
         eu vou so fazer ordenacao crescente pra numericos, alfabetico para strings
@@ -229,7 +271,7 @@ bool add_item(CROSS_LIST *cross_list, ITEM* item)
             }
 
             //check field, then determine where to put it, then adjust the connecting pointers
-            
+
             //pega qual tipo de comparacao usar
             if(item_get_type(item, cross_list->lineSortingField) == ITEM_STRING)
             { //comparing strings (strcmp)
@@ -247,10 +289,10 @@ bool add_item(CROSS_LIST *cross_list, ITEM* item)
                         aux->previous->next = noLinha;
                     }
                     aux->previous = noLinha;
-                    
+
                     break; //if the program reaches here, it has placed the item, so the loop isnt necessary anymore
                 }
-                
+
                 if(i ==(cross_list->len - 1)) //if the item is to be placed at the end of the list
                 {
                     aux->next = noLinha;
@@ -277,10 +319,10 @@ bool add_item(CROSS_LIST *cross_list, ITEM* item)
                         aux->previous->next = noLinha;
                     }
                     aux->previous = noLinha;
-                    
+
                     break; //if the program reaches here, it has placed the item, so the loop isnt necessary anymore
                 }
-                
+
                 if(i == (cross_list->len - 1)) //if the item is false or there are only true items in the list it is to be placed at the end of the list
                 {
                     aux->next = noLinha;
@@ -288,7 +330,7 @@ bool add_item(CROSS_LIST *cross_list, ITEM* item)
                     noLinha->next = NULL;
 
                     break; //if the program reaches here, it has placed the item, so the loop isnt necessary anymore
-                }   
+                }
             }
             //comparing numeric
             else if(item_get_type(item, cross_list->lineSortingField) == ITEM_INT)
@@ -307,10 +349,10 @@ bool add_item(CROSS_LIST *cross_list, ITEM* item)
                         aux->previous->next = noLinha;
                     }
                     aux->previous = noLinha;
-                    
+
                     break; //if the program reaches here, it has placed the item, so the loop isnt necessary anymore
                 }
-                
+
                 if(i ==(cross_list->len - 1)) //if the item is to be placed at the end of the list
                 {
                     aux->next = noLinha;
@@ -336,10 +378,10 @@ bool add_item(CROSS_LIST *cross_list, ITEM* item)
                         aux->previous->next = noLinha;
                     }
                     aux->previous = noLinha;
-                    
+
                     break; //if the program reaches here, it has placed the item, so the loop isnt necessary anymore
                 }
-                
+
                 if(i ==(cross_list->len - 1)) //if the item is to be placed at the end of the list
                 {
                     aux->next = noLinha;
@@ -356,7 +398,7 @@ bool add_item(CROSS_LIST *cross_list, ITEM* item)
             }
 
             //if it reaches here, it checked the position related to the current node aux is pointing to and the place wasnt aproppriate, so we move onto the next node
-            aux = aux->next; 
+            aux = aux->next;
         }
 
 
@@ -371,7 +413,7 @@ bool add_item(CROSS_LIST *cross_list, ITEM* item)
             }
 
             //check field, then determine where to put it, then adjust the connecting pointers
-            
+
             //pega qual tipo de comparacao usar
             if(item_get_type(item, cross_list->columnSortingField) == ITEM_STRING)
             { //comparing strings (strcmp)
@@ -389,10 +431,10 @@ bool add_item(CROSS_LIST *cross_list, ITEM* item)
                         aux->previous->next = noColuna;
                     }
                     aux->previous = noColuna;
-                    
+
                     break; //if the program reaches here, it has placed the item, so the loop isnt necessary anymore
                 }
-                
+
                 if(i ==(cross_list->len - 1)) //if the item is to be placed at the end of the list
                 {
                     aux->next = noColuna;
@@ -419,10 +461,10 @@ bool add_item(CROSS_LIST *cross_list, ITEM* item)
                         aux->previous->next = noColuna;
                     }
                     aux->previous = noColuna;
-                    
+
                     break; //if the program reaches here, it has placed the item, so the loop isnt necessary anymore
                 }
-                
+
                 if(i == (cross_list->len - 1)) //if the item is false or there are only true items in the list it is to be placed at the end of the list
                 {
                     aux->next = noColuna;
@@ -430,7 +472,7 @@ bool add_item(CROSS_LIST *cross_list, ITEM* item)
                     noColuna->next = NULL;
 
                     break; //if the program reaches here, it has placed the item, so the loop isnt necessary anymore
-                }   
+                }
             }
             //comparing numeric
             else if(item_get_type(item, cross_list->columnSortingField) == ITEM_INT)
@@ -449,10 +491,10 @@ bool add_item(CROSS_LIST *cross_list, ITEM* item)
                         aux->previous->next = noColuna;
                     }
                     aux->previous = noColuna;
-                    
+
                     break; //if the program reaches here, it has placed the item, so the loop isnt necessary anymore
                 }
-                
+
                 if(i ==(cross_list->len - 1)) //if the item is to be placed at the end of the list
                 {
                     aux->next = noColuna;
@@ -478,10 +520,10 @@ bool add_item(CROSS_LIST *cross_list, ITEM* item)
                         aux->previous->next = noColuna;
                     }
                     aux->previous = noColuna;
-                    
+
                     break; //if the program reaches here, it has placed the item, so the loop isnt necessary anymore
                 }
-                
+
                 if(i ==(cross_list->len - 1)) //if the item is to be placed at the end of the list
                 {
                     aux->next = noColuna;
@@ -498,7 +540,7 @@ bool add_item(CROSS_LIST *cross_list, ITEM* item)
             }
 
             //if it reaches here, it checked the position related to the current node aux is pointing to and the place wasnt aproppriate, so we move onto the next node
-            aux = aux->next; 
+            aux = aux->next;
         }
     }
 
@@ -540,16 +582,16 @@ bool remove_search(CROSS_LIST *linked_list, void *key, DATATYPE keyType, int lis
  */
 ITEM *search(CROSS_LIST *cross_list, void *key, int field)
 {
-    //determines if the search should happen on the line-list or column-list 
+    //determines if the search should happen on the line-list or column-list
     NODE* aux = cross_list->lineStart; //will look in the line-list by default, unless the field is the field used in the sorting of the column-line
     if(field == cross_list->columnSortingField)
-    {//key being looked for is the same field as the column sorting field (so it should be near the top) 
+    {//key being looked for is the same field as the column sorting field (so it should be near the top)
         aux = cross_list->columnStart;
     }
 
     for(int i = 0; i < cross_list->len; i++)
     {
-        
+
         if(aux == NULL) //would indicate a possible error
         {
             break;
@@ -568,7 +610,7 @@ ITEM *search(CROSS_LIST *cross_list, void *key, int field)
             if(*((bool*)get_field_content(aux->item, field)) == *((bool*)key))
             {
                 return aux->item;
-            }   
+            }
         }
         //comparing numeric
         else if(item_get_type(aux->item, field) == ITEM_INT)
@@ -589,7 +631,7 @@ ITEM *search(CROSS_LIST *cross_list, void *key, int field)
         {
             printf("erro na busca na lista cruzada; tipo invalido");
             return false;
-        }   
+        }
 
         aux = aux->next;
     }
