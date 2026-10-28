@@ -176,6 +176,8 @@ bool delete_cross_list(CROSS_LIST **cross_list)
     }
     (*cross_list)->lineStart = NULL; //completa a liberacao da lista-linha
 
+    current = (*cross_list)->columnStart;
+    next = current->next;
     for(int i = 0; i < (*cross_list)->len; i++) //passa pela lista-coluna liberando seus nos e tirando ponteiros pendentes
     {
         if(current == NULL) //redundancia caso o len tenha quebrado
