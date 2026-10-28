@@ -1,18 +1,17 @@
 #ifndef LISTA_CRUZADA_H
 #define LISTA_CRUZADA_H
 
-#include "item.h"
+#include "../item.h"
 
 typedef struct ordered_list ORDERED_LIST;
-
-
+typedef struct node NODE;
 
 /**
  * @brief Cria ORDERED_LIST
  * @param[in] INT que indica a posicao do campo no vetor FIELDS do item usado para a ordenacao das lista
  * @return Ponteiro para a ORDERED_LIST ou NULL no caso de erros.
  */
-ORDERED_LIST *create_ordered_list(int sortingCriteria);
+ORDERED_LIST *create_ordered_list(void);
 
 /**
  * @brief Deleta ORDERED_LIST

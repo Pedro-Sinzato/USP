@@ -5,6 +5,7 @@
 #include "estruturas_dados.h"
 #include "item.h"
 #include "lista_cruzada/orthogonal_list.h"
+#include "lista_ordenada/ordered_list.h"
 #include "query/query.h"
 #include "stack/stack.h"
 #include "lista_cabeca/lista_cabeca.h"
@@ -56,6 +57,7 @@ ED *create_ed(ED_TYPES type)
     case LISTA_CABECA:
         return (ED *)create_lista_cabeca();
     case LISTA_ORD:
+        return (ED *)create_ordered_list();
     case LISTA_GEN:
     case LISTA_CRUZ:
         return (ED *)create_cross_list();

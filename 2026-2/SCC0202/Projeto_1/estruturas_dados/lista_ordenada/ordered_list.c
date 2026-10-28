@@ -4,9 +4,9 @@
 #include <string.h>
 
 
-#include "item.h"
+#include "../item.h"
 #include "ordered_list.h"
-
+#include "../estruturas_dados.h"
 
 struct node
 {
@@ -15,22 +15,59 @@ struct node
     NODE* next;
 };
 
-typedef struct node NODE;
-
 struct ordered_list
 {
+    ED base;
     NODE* start;
     DATATYPE sortingCriteria;
-    int len; 
+    int len;
 };
 
 
 //prototipos
-ORDERED_LIST *create_ordered_list(int sortingCriteria);
+ORDERED_LIST *create_ordered_list(void);
 bool delete_ordered_list(ORDERED_LIST **ordered_list);
 bool add_item(ORDERED_LIST *ordered_list, ITEM* item);
 ITEM *search(ORDERED_LIST *ordered_list, void *key, int field);
 
+static bool order_list_destroy(ED **self)
+{
+    if (self == NULL || *self == NULL)
+    {
+        return true;
+    }
+
+    ORDERED_LIST *order_list = (ORDERED_LIST *)*self;
+    bool ok = delete_ordered_list(&order_list);
+    *self = NULL;
+
+    return ok;
+}
+
+static bool ordered_list_insert_ed(ED *self, ITEM *item)
+{
+    return add_item((ORDERED_LIST *)self, item);
+}
+
+static void ordered_list_for_each(const ED *self, ED_VISIT visit, void *ctx)
+{
+    const ORDERED_LIST *order_list = (const ORDERED_LIST *)self;
+
+    for (const NODE *atual = order_list->start; atual != NULL; atual = atual->next)
+    {
+        if (!visit(atual->item, ctx))
+        {
+            return;
+        }
+    }
+}
+
+static const ED_VTABLE query_vtable =
+{
+    order_list_destroy,
+    ordered_list_insert_ed,
+    ordered_list_for_each
+};
 
 //funcoes
 
@@ -39,8 +76,9 @@ ITEM *search(ORDERED_LIST *ordered_list, void *key, int field);
  * @param[in] INT que indica a posicao do campo no vetor FIELDS do item usado para a ordenacao das lista
  * @return Ponteiro para a ORDERED_LIST ou NULL no caso de erros.
  */
-ORDERED_LIST *create_ordered_list(int sortingCriteria)
+ORDERED_LIST *create_ordered_list(void) //Colocar de volta o critério de Sorting
 {
+    int sortingCriteria = 0; //Apagar
     ORDERED_LIST* ordered_list = (ORDERED_LIST*)malloc(sizeof(ORDERED_LIST));
 
     if(ordered_list == NULL)
@@ -53,7 +91,7 @@ ORDERED_LIST *create_ordered_list(int sortingCriteria)
     ordered_list->start = NULL;
     ordered_list->sortingCriteria = sortingCriteria;
 
-    return ordered_list;   
+    return ordered_list;
 }
 
 /**
@@ -96,13 +134,13 @@ bool delete_ordered_list(ORDERED_LIST **ordered_list)
         free(current);
 
         current = next;
-        
+
         if(current != NULL)
         {
             next = current->next;
         }
     }
-    (*ordered_list)->start = NULL; 
+    (*ordered_list)->start = NULL;
     free((*ordered_list)); //libera a estrutura principal e tira ponteiro pendente
     ordered_list = NULL;
 
@@ -126,13 +164,13 @@ bool add_item(ORDERED_LIST *ordered_list, ITEM* item)
 
     NODE* no = (NODE*)malloc(sizeof(NODE));
     no->item = item;
-    
+
     //caso de insercao caso nenhuma das duas listas tenha itens
     if(ordered_list->len == 0)
     {
         ordered_list->start = no;
         no->next = NULL;
-        no->previous = NULL;    
+        no->previous = NULL;
     }
     else //insercao padrao
     {
@@ -165,10 +203,10 @@ bool add_item(ORDERED_LIST *ordered_list, ITEM* item)
                         aux->previous->next = no;
                     }
                     aux->previous = no;
-                    
+
                     break; //if the program reaches here, it has placed the item, so the loop isnt necessary anymore
                 }
-                
+
                 if(i ==(ordered_list->len - 1)) //if the item is to be placed at the end of the list
                 {
                     aux->next = no;
@@ -195,10 +233,10 @@ bool add_item(ORDERED_LIST *ordered_list, ITEM* item)
                         aux->previous->next = no;
                     }
                     aux->previous = no;
-                    
+
                     break; //if the program reaches here, it has placed the item, so the loop isnt necessary anymore
                 }
-                
+
                 if(i == (ordered_list->len - 1)) //if the item is false or there are only true items in the list it is to be placed at the end of the list
                 {
                     aux->next = no;
@@ -206,7 +244,7 @@ bool add_item(ORDERED_LIST *ordered_list, ITEM* item)
                     no->next = NULL;
 
                     break; //if the program reaches here, it has placed the item, so the loop isnt necessary anymore
-                }   
+                }
             }
             //comparing numeric
             else if(item_get_type(item, ordered_list->sortingCriteria) == ITEM_INT)
@@ -225,10 +263,10 @@ bool add_item(ORDERED_LIST *ordered_list, ITEM* item)
                         aux->previous->next = no;
                     }
                     aux->previous = no;
-                    
+
                     break; //if the program reaches here, it has placed the item, so the loop isnt necessary anymore
                 }
-                
+
                 if(i ==(ordered_list->len - 1)) //if the item is to be placed at the end of the list
                 {
                     aux->next = no;
@@ -254,10 +292,10 @@ bool add_item(ORDERED_LIST *ordered_list, ITEM* item)
                         aux->previous->next = no;
                     }
                     aux->previous = no;
-                    
+
                     break; //if the program reaches here, it has placed the item, so the loop isnt necessary anymore
                 }
-                
+
                 if(i ==(ordered_list->len - 1)) //if the item is to be placed at the end of the list
                 {
                     aux->next = no;
@@ -274,7 +312,7 @@ bool add_item(ORDERED_LIST *ordered_list, ITEM* item)
             }
 
             //if it reaches here, it checked the position related to the current node aux is pointing to and the place wasnt aproppriate, so we move onto the next node
-            aux = aux->next; 
+            aux = aux->next;
         }
 
     ordered_list->len += 1;
@@ -294,12 +332,12 @@ bool add_item(ORDERED_LIST *ordered_list, ITEM* item)
  * @return Ponteiro para ITEM, NULL em caso de erros (lista/item inexistente ou nao encontrado, tipo de campo invalido, etc).
  */
 ITEM *search(ORDERED_LIST *ordered_list, void *key, int field)
-{ 
+{
     NODE* aux = ordered_list->start;
 
     for(int i = 0; i < ordered_list->len; i++)
     {
-        
+
         if(aux == NULL) //would indicate a possible error
         {
             break;
@@ -317,7 +355,7 @@ ITEM *search(ORDERED_LIST *ordered_list, void *key, int field)
             if(*((bool*)get_field_content(aux->item, field)) == *((bool*)key))
             {
                 return aux->item;
-            }   
+            }
         }
         //comparing numeric
         else if(item_get_type(aux->item, field) == ITEM_INT)
@@ -338,7 +376,7 @@ ITEM *search(ORDERED_LIST *ordered_list, void *key, int field)
         {
             printf("erro na busca na lista ordenada; tipo invalido");
             return false;
-        }   
+        }
 
         aux = aux->next;
     }
