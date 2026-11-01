@@ -28,6 +28,15 @@ extern bool delete_sim(SIM **sim);
  * @return Valor de SIMILARIDADE calculado.
  */
 extern double similarity(SIM *sim);
+
+/**
+ * @brief Calcula a SIMILARIDADE entre os parametros estabelecidos em um SIM e um valor (geralmente pego de um item).
+ * @param[in] Ponteiro para SIM.
+ * @param[in] Valor para ser comparado em relacao a tolerancia
+ * @return Valor de SIMILARIDADE calculado.
+ */
+extern double calculate_similarity(SIM *sim, double x);
+
 /**
  * @brief Lê a DATABASE.
  * @param[in] Nome do arquivo DATABASE.
@@ -35,7 +44,7 @@ extern double similarity(SIM *sim);
  */
 extern double total_similarity(SIM *sim[], int total_sim);
 
-extern CAMPO get_sim_campo(const SIM *sim);
+extern int get_sim_campo(const SIM *sim);
 extern double get_sim_alvo(const SIM *sim);
 extern double get_sim_tolerancia(const SIM *sim);
 extern double get_sim_peso(const SIM *sim);

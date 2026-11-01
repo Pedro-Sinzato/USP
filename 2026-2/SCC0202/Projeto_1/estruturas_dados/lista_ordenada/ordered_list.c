@@ -6,6 +6,8 @@
 #include "../item.h"
 #include "ordered_list.h"
 #include "../estruturas_dados.h"
+#include "../../query/query.h"
+#include "../../query/sim.h"
 
 struct node
 {
@@ -19,6 +21,9 @@ struct ordered_list
     ED base;
     NODE *start;
     DATATYPE sortingCriteria;
+    bool order_by_sim;
+    ORDEM order_dir;
+    SIM* sim;
     int len;
 };
 
@@ -64,12 +69,14 @@ static const ED_VTABLE order_list_vtable =
 
 /**
  * @brief Cria ORDERED_LIST
+ * @param[in] bool que indica se a lista vai ser ordenada por similaridade
  * @param[in] INT que indica a posicao do campo no vetor FIELDS do item usado para a ordenacao das lista
+ * @param[in] ORDEM indica se a lista vai ser ordenada de forma ascendente ou descendente
+ * @param[in] SIM campo de similaridade do query; se nao houver ordenacao por similaridade, colococar NULL
  * @return Ponteiro para a ORDERED_LIST ou NULL no caso de erros.
  */
-extern ORDERED_LIST *create_ordered_list(void) // Colocar de volta o critério de Sorting
+extern ORDERED_LIST *create_ordered_list(bool order_by_sim, int sortingCriteria, ORDEM order_dir, SIM *sim) 
 {
-    int sortingCriteria = 0; // Apagar
     ORDERED_LIST *ordered_list = (ORDERED_LIST *)malloc(sizeof(ORDERED_LIST));
 
     if (ordered_list == NULL)
@@ -82,6 +89,9 @@ extern ORDERED_LIST *create_ordered_list(void) // Colocar de volta o critério d
     ordered_list->start = NULL;
     ordered_list->base.ed_vtable = &order_list_vtable;
     ordered_list->sortingCriteria = sortingCriteria;
+    ordered_list->order_by_sim = order_by_sim;
+    ordered_list->order_dir = order_dir;
+    ordered_list->sim = sim;
 
     return ordered_list;
 }
@@ -156,7 +166,8 @@ bool ordered_list_add_item(ORDERED_LIST *ordered_list, ITEM *item)
     NODE *no = (NODE *)malloc(sizeof(NODE));
     no->item = item;
 
-    // caso de insercao caso nenhuma das duas listas tenha itens
+
+    // caso de insercao caso a lista nao tenha itens
     if (ordered_list->len == 0)
     {
         ordered_list->start = no;
@@ -165,149 +176,463 @@ bool ordered_list_add_item(ORDERED_LIST *ordered_list, ITEM *item)
     }
     else // insercao padrao
     {
+        //Insercao sem similaridade
         NODE *aux; // ponteiro que vai ajudar a determinar em qual posicao inserir
-
+        
         // insercao na lista-linha
         aux = ordered_list->start;
-
-        for (int i = 0; i < ordered_list->len; i++) // cicles item per item, checking where the node should be placed
+        
+        if(ordered_list->order_by_sim)
         {
-            if (aux == NULL) // would indicate a possible error
+            if(item_get_type(item, ordered_list->sortingCriteria) == ITEM_BOOL || item_get_type(item, ordered_list->sortingCriteria) == ITEM_STRING)
             {
-                break;
+                printf("tipo invalido para ordenar por similaridade");
+                return false;   
             }
 
-            // pega qual tipo de comparacao usar
-            if (item_get_type(item, ordered_list->sortingCriteria) == ITEM_STRING)
-            { // comparing strings (strcmp)
-                if (strcmp((char *)get_field_content(aux->item, ordered_list->sortingCriteria), (char *)get_field_content(item, ordered_list->sortingCriteria)) <= 0)
-                { // if the item of the position we are inspecting is bigger than the item to be inserted, we position our new node behind it
-                    no->next = aux;
-                    if (i == 0) // if the item is to be placed behind the current first node;
-                    {
-                        no->previous = NULL;
-                        ordered_list->start = no;
-                    }
-                    else
-                    {
-                        no->previous = aux->previous;
-                        aux->previous->next = no;
-                    }
-                    aux->previous = no;
-
-                    break; // if the program reaches here, it has placed the item, so the loop isnt necessary anymore
-                }
-
-                if (i == (ordered_list->len - 1)) // if the item is to be placed at the end of the list
-                {
-                    aux->next = no;
-                    no->previous = aux;
-                    no->next = NULL;
-
-                    break; // if the program reaches here, it has placed the item, so the loop isnt necessary anymore
-                }
-            }
-            else if (item_get_type(item, ordered_list->sortingCriteria) == ITEM_BOOL)
-            { // comparing boolean (true goes first, false goes later)
-                if (*((bool *)get_field_content(aux->item, ordered_list->sortingCriteria)) == false &&
-                    *((bool *)get_field_content(item, ordered_list->sortingCriteria)) == true) //
-                {                                                                              // if the item of the position we are inspecting is false and the item is true, we position our new node behind it, in the border between the true and the false
-                    no->next = aux;
-                    if (i == 0) // if the item is to be placed behind the current first node;
-                    {
-                        no->previous = NULL;
-                        ordered_list->start = no;
-                    }
-                    else
-                    {
-                        no->previous = aux->previous;
-                        aux->previous->next = no;
-                    }
-                    aux->previous = no;
-
-                    break; // if the program reaches here, it has placed the item, so the loop isnt necessary anymore
-                }
-
-                if (i == (ordered_list->len - 1)) // if the item is false or there are only true items in the list it is to be placed at the end of the list
-                {
-                    aux->next = no;
-                    no->previous = aux;
-                    no->next = NULL;
-
-                    break; // if the program reaches here, it has placed the item, so the loop isnt necessary anymore
-                }
-            }
-            // comparing numeric
-            else if (item_get_type(item, ordered_list->sortingCriteria) == ITEM_INT)
-            { // if its an integer
-                if (*((int *)get_field_content(aux->item, ordered_list->sortingCriteria)) > *((int *)get_field_content(item, ordered_list->sortingCriteria)))
-                { // if the item of the position we are inspecting is bigger than the item to be inserted, we position our new node behind it
-                    no->next = aux;
-                    if (i == 0) // if the item is to be placed behind the current first node;
-                    {
-                        no->previous = NULL;
-                        ordered_list->start = no;
-                    }
-                    else
-                    {
-                        no->previous = aux->previous;
-                        aux->previous->next = no;
-                    }
-                    aux->previous = no;
-
-                    break; // if the program reaches here, it has placed the item, so the loop isnt necessary anymore
-                }
-
-                if (i == (ordered_list->len - 1)) // if the item is to be placed at the end of the list
-                {
-                    aux->next = no;
-                    no->previous = aux;
-                    no->next = NULL;
-
-                    break; // if the program reaches here, it has placed the item, so the loop isnt necessary anymore
-                }
-            }
-            else if (item_get_type(item, ordered_list->sortingCriteria) == ITEM_DOUBLE)
-            { // if its a double
-                if (*((double *)get_field_content(aux->item, ordered_list->sortingCriteria)) > *((double *)get_field_content(item, ordered_list->sortingCriteria)))
-                { // if the item of the position we are inspecting is bigger than the item to be inserted, we position our new node behind it
-                    no->next = aux;
-                    if (i == 0) // if the item is to be placed behind the current first node;
-                    {
-                        no->previous = NULL;
-                        ordered_list->start = no;
-                    }
-                    else
-                    {
-                        no->previous = aux->previous;
-                        aux->previous->next = no;
-                    }
-                    aux->previous = no;
-
-                    break; // if the program reaches here, it has placed the item, so the loop isnt necessary anymore
-                }
-
-                if (i == (ordered_list->len - 1)) // if the item is to be placed at the end of the list
-                {
-                    aux->next = no;
-                    no->previous = aux;
-                    no->next = NULL;
-
-                    break; // if the program reaches here, it has placed the item, so the loop isnt necessary anymore
-                }
-            }
-            else
+            if(ordered_list->order_dir == ORDEM_ASC)
             {
-                printf("erro na insercao na lista cruzada; tipo invalido");
-                return false;
+                for (int i = 0; i < ordered_list->len; i++) // cicles item per item, checking where the node should be placed
+                {
+                    if (aux == NULL) // would indicate a possible error
+                    {
+                        break;
+                    }
+                    
+                    // comparing numeric
+                    else if (item_get_type(item, ordered_list->sortingCriteria) == ITEM_INT)
+                    { // if its an integer
+                        if (*((int *)get_field_content(aux->item, ordered_list->sortingCriteria)) > *((int *)get_field_content(item, ordered_list->sortingCriteria)))
+                        { // if the item of the position we are inspecting is bigger than the item to be inserted, we position our new node behind it
+                            no->next = aux;
+                            if (i == 0) // if the item is to be placed behind the current first node;
+                            {
+                                no->previous = NULL;
+                                ordered_list->start = no;
+                            }
+                            else
+                            {
+                                no->previous = aux->previous;
+                                aux->previous->next = no;
+                            }
+                            aux->previous = no;
+                            
+                            break; // if the program reaches here, it has placed the item, so the loop isnt necessary anymore
+                        }
+                        
+                        if (i == (ordered_list->len - 1)) // if the item is to be placed at the end of the list
+                        {
+                            aux->next = no;
+                            no->previous = aux;
+                            no->next = NULL;
+                            
+                            break; // if the program reaches here, it has placed the item, so the loop isnt necessary anymore
+                        }
+                    }
+                    else if (item_get_type(item, ordered_list->sortingCriteria) == ITEM_DOUBLE)
+                    { // if its a double
+                        if (*((double *)get_field_content(aux->item, ordered_list->sortingCriteria)) > *((double *)get_field_content(item, ordered_list->sortingCriteria)))
+                        { // if the item of the position we are inspecting is bigger than the item to be inserted, we position our new node behind it
+                            no->next = aux;
+                            if (i == 0) // if the item is to be placed behind the current first node;
+                            {
+                                no->previous = NULL;
+                                ordered_list->start = no;
+                            }
+                            else
+                            {
+                                no->previous = aux->previous;
+                                aux->previous->next = no;
+                            }
+                            aux->previous = no;
+                            
+                            break; // if the program reaches here, it has placed the item, so the loop isnt necessary anymore
+                        }
+                        
+                        if (i == (ordered_list->len - 1)) // if the item is to be placed at the end of the list
+                        {
+                            aux->next = no;
+                            no->previous = aux;
+                            no->next = NULL;
+                            
+                            break; // if the program reaches here, it has placed the item, so the loop isnt necessary anymore
+                        }
+                    }
+                    else
+                    {
+                        printf("erro na insercao na lista cruzada; tipo invalido");
+                        return false;
+                    }
+                    
+                    // if it reaches here, it checked the position related to the current node aux is pointing to and the place wasnt aproppriate, so we move onto the next node
+                    aux = aux->next;
+                }
             }
-
-            // if it reaches here, it checked the position related to the current node aux is pointing to and the place wasnt aproppriate, so we move onto the next node
-            aux = aux->next;
+            else if(ordered_list->order_dir == ORDEM_DESC)
+            {
+                for (int i = 0; i < ordered_list->len; i++) // cicles item per item, checking where the node should be placed
+                {
+                    if (aux == NULL) // would indicate a possible error
+                    {
+                        break;
+                    }
+                    
+                    // pega qual tipo de comparacao usar
+                    else if (item_get_type(item, ordered_list->sortingCriteria) == ITEM_INT)
+                    { // if its an integer
+                        if (*((int *)get_field_content(aux->item, ordered_list->sortingCriteria)) < *((int *)get_field_content(item, ordered_list->sortingCriteria)))
+                        { // if the item of the position we are inspecting is smaller than the item to be inserted, we position our new node behind it
+                            no->next = aux;
+                            if (i == 0) // if the item is to be placed behind the current first node;
+                            {
+                                no->previous = NULL;
+                                ordered_list->start = no;
+                            }
+                            else
+                            {
+                                no->previous = aux->previous;
+                                aux->previous->next = no;
+                            }
+                            aux->previous = no;
+                            
+                            break; // if the program reaches here, it has placed the item, so the loop isnt necessary anymore
+                        }
+                        
+                        if (i == (ordered_list->len - 1)) // if the item is to be placed at the end of the list
+                        {
+                            aux->next = no;
+                            no->previous = aux;
+                            no->next = NULL;
+                            
+                            break; // if the program reaches here, it has placed the item, so the loop isnt necessary anymore
+                        }
+                    }
+                    else if (item_get_type(item, ordered_list->sortingCriteria) == ITEM_DOUBLE)
+                    { // if its a double
+                        if (*((double *)get_field_content(aux->item, ordered_list->sortingCriteria)) < *((double *)get_field_content(item, ordered_list->sortingCriteria)))
+                        { // if the item of the position we are inspecting is smaller than the item to be inserted, we position our new node behind it
+                            no->next = aux;
+                            if (i == 0) // if the item is to be placed behind the current first node;
+                            {
+                                no->previous = NULL;
+                                ordered_list->start = no;
+                            }
+                            else
+                            {
+                                no->previous = aux->previous;
+                                aux->previous->next = no;
+                            }
+                            aux->previous = no;
+                            
+                            break; // if the program reaches here, it has placed the item, so the loop isnt necessary anymore
+                        }
+                        
+                        if (i == (ordered_list->len - 1)) // if the item is to be placed at the end of the list
+                        {
+                            aux->next = no;
+                            no->previous = aux;
+                            no->next = NULL;
+                            
+                            break; // if the program reaches here, it has placed the item, so the loop isnt necessary anymore
+                        }
+                    }
+                    else
+                    {
+                        printf("erro na insercao na lista cruzada; tipo invalido");
+                        return false;
+                    }
+                    
+                    // if it reaches here, it checked the position related to the current node aux is pointing to and the place wasnt aproppriate, so we move onto the next node
+                    aux = aux->next;
+                }
+            }
+        }
+        else
+        {
+            if(ordered_list->order_dir == ORDEM_ASC)
+            {
+                for (int i = 0; i < ordered_list->len; i++) // cicles item per item, checking where the node should be placed
+                {
+                    if (aux == NULL) // would indicate a possible error
+                    {
+                        break;
+                    }
+                    
+                    // pega qual tipo de comparacao usar
+                    if (item_get_type(item, ordered_list->sortingCriteria) == ITEM_STRING)
+                    { // comparing strings (strcmp)
+                        if (strcmp((char *)get_field_content(aux->item, ordered_list->sortingCriteria), (char *)get_field_content(item, ordered_list->sortingCriteria)) <= 0)
+                        { // if the item of the position we are inspecting is bigger than the item to be inserted, we position our new node behind it
+                            no->next = aux;
+                            if (i == 0) // if the item is to be placed behind the current first node;
+                            {
+                                no->previous = NULL;
+                                ordered_list->start = no;
+                            }
+                            else
+                            {
+                                no->previous = aux->previous;
+                                aux->previous->next = no;
+                            }
+                            aux->previous = no;
+                            
+                            break; // if the program reaches here, it has placed the item, so the loop isnt necessary anymore
+                        }
+                        
+                        if (i == (ordered_list->len - 1)) // if the item is to be placed at the end of the list
+                        {
+                            aux->next = no;
+                            no->previous = aux;
+                            no->next = NULL;
+                            
+                            break; // if the program reaches here, it has placed the item, so the loop isnt necessary anymore
+                        }
+                    }
+                    else if (item_get_type(item, ordered_list->sortingCriteria) == ITEM_BOOL)
+                    { // comparing boolean (true goes first, false goes later)
+                        if (*((bool *)get_field_content(aux->item, ordered_list->sortingCriteria)) == false &&
+                        *((bool *)get_field_content(item, ordered_list->sortingCriteria)) == true) //
+                        {                                                                              // if the item of the position we are inspecting is false and the item is true, we position our new node behind it, in the border between the true and the false
+                            no->next = aux;
+                            if (i == 0) // if the item is to be placed behind the current first node;
+                            {
+                                no->previous = NULL;
+                                ordered_list->start = no;
+                            }
+                            else
+                            {
+                                no->previous = aux->previous;
+                                aux->previous->next = no;
+                            }
+                            aux->previous = no;
+                            
+                            break; // if the program reaches here, it has placed the item, so the loop isnt necessary anymore
+                        }
+                        
+                        if (i == (ordered_list->len - 1)) // if the item is false or there are only true items in the list it is to be placed at the end of the list
+                        {
+                            aux->next = no;
+                            no->previous = aux;
+                            no->next = NULL;
+                            
+                            break; // if the program reaches here, it has placed the item, so the loop isnt necessary anymore
+                        }
+                    }
+                    // comparing numeric
+                    else if (item_get_type(item, ordered_list->sortingCriteria) == ITEM_INT)
+                    { // if its an integer
+                        if (*((int *)get_field_content(aux->item, ordered_list->sortingCriteria)) > *((int *)get_field_content(item, ordered_list->sortingCriteria)))
+                        { // if the item of the position we are inspecting is bigger than the item to be inserted, we position our new node behind it
+                            no->next = aux;
+                            if (i == 0) // if the item is to be placed behind the current first node;
+                            {
+                                no->previous = NULL;
+                                ordered_list->start = no;
+                            }
+                            else
+                            {
+                                no->previous = aux->previous;
+                                aux->previous->next = no;
+                            }
+                            aux->previous = no;
+                            
+                            break; // if the program reaches here, it has placed the item, so the loop isnt necessary anymore
+                        }
+                        
+                        if (i == (ordered_list->len - 1)) // if the item is to be placed at the end of the list
+                        {
+                            aux->next = no;
+                            no->previous = aux;
+                            no->next = NULL;
+                            
+                            break; // if the program reaches here, it has placed the item, so the loop isnt necessary anymore
+                        }
+                    }
+                    else if (item_get_type(item, ordered_list->sortingCriteria) == ITEM_DOUBLE)
+                    { // if its a double
+                        if (*((double *)get_field_content(aux->item, ordered_list->sortingCriteria)) > *((double *)get_field_content(item, ordered_list->sortingCriteria)))
+                        { // if the item of the position we are inspecting is bigger than the item to be inserted, we position our new node behind it
+                            no->next = aux;
+                            if (i == 0) // if the item is to be placed behind the current first node;
+                            {
+                                no->previous = NULL;
+                                ordered_list->start = no;
+                            }
+                            else
+                            {
+                                no->previous = aux->previous;
+                                aux->previous->next = no;
+                            }
+                            aux->previous = no;
+                            
+                            break; // if the program reaches here, it has placed the item, so the loop isnt necessary anymore
+                        }
+                        
+                        if (i == (ordered_list->len - 1)) // if the item is to be placed at the end of the list
+                        {
+                            aux->next = no;
+                            no->previous = aux;
+                            no->next = NULL;
+                            
+                            break; // if the program reaches here, it has placed the item, so the loop isnt necessary anymore
+                        }
+                    }
+                    else
+                    {
+                        printf("erro na insercao na lista cruzada; tipo invalido");
+                        return false;
+                    }
+                    
+                    // if it reaches here, it checked the position related to the current node aux is pointing to and the place wasnt aproppriate, so we move onto the next node
+                    aux = aux->next;
+                }
+            }
+            else if(ordered_list->order_dir == ORDEM_DESC)
+            {
+                for (int i = 0; i < ordered_list->len; i++) // cicles item per item, checking where the node should be placed
+                {
+                    if (aux == NULL) // would indicate a possible error
+                    {
+                        break;
+                    }
+                    
+                    // pega qual tipo de comparacao usar
+                    if (item_get_type(item, ordered_list->sortingCriteria) == ITEM_STRING)
+                    { // comparing strings (strcmp)
+                        if (strcmp((char *)get_field_content(aux->item, ordered_list->sortingCriteria), (char *)get_field_content(item, ordered_list->sortingCriteria)) >= 0)
+                        { // if the item of the position we are inspecting is smaller than the item to be inserted, we position our new node behind it
+                            no->next = aux;
+                            if (i == 0) // if the item is to be placed behind the current first node;
+                            {
+                                no->previous = NULL;
+                                ordered_list->start = no;
+                            }
+                            else
+                            {
+                                no->previous = aux->previous;
+                                aux->previous->next = no;
+                            }
+                            aux->previous = no;
+                            
+                            break; // if the program reaches here, it has placed the item, so the loop isnt necessary anymore
+                        }
+                        
+                        if (i == (ordered_list->len - 1)) // if the item is to be placed at the end of the list
+                        {
+                            aux->next = no;
+                            no->previous = aux;
+                            no->next = NULL;
+                            
+                            break; // if the program reaches here, it has placed the item, so the loop isnt necessary anymore
+                        }
+                    }
+                    else if (item_get_type(item, ordered_list->sortingCriteria) == ITEM_BOOL)
+                    { // comparing boolean (false goes first, true goes later)
+                        if (*((bool *)get_field_content(aux->item, ordered_list->sortingCriteria)) == true &&
+                        *((bool *)get_field_content(item, ordered_list->sortingCriteria)) == false) //
+                        {                                                                             
+                            no->next = aux;
+                            if (i == 0) // if the item is to be placed behind the current first node;
+                            {
+                                no->previous = NULL;
+                                ordered_list->start = no;
+                            }
+                            else
+                            {
+                                no->previous = aux->previous;
+                                aux->previous->next = no;
+                            }
+                            aux->previous = no;
+                            
+                            break; // if the program reaches here, it has placed the item, so the loop isnt necessary anymore
+                        }
+                        
+                        if (i == (ordered_list->len - 1))
+                        {
+                            aux->next = no;
+                            no->previous = aux;
+                            no->next = NULL;
+                            
+                            break; // if the program reaches here, it has placed the item, so the loop isnt necessary anymore
+                        }
+                    }
+                    // comparing numeric
+                    else if (item_get_type(item, ordered_list->sortingCriteria) == ITEM_INT)
+                    { // if its an integer
+                        if (*((int *)get_field_content(aux->item, ordered_list->sortingCriteria)) < *((int *)get_field_content(item, ordered_list->sortingCriteria)))
+                        { // if the item of the position we are inspecting is smaller than the item to be inserted, we position our new node behind it
+                            no->next = aux;
+                            if (i == 0) // if the item is to be placed behind the current first node;
+                            {
+                                no->previous = NULL;
+                                ordered_list->start = no;
+                            }
+                            else
+                            {
+                                no->previous = aux->previous;
+                                aux->previous->next = no;
+                            }
+                            aux->previous = no;
+                            
+                            break; // if the program reaches here, it has placed the item, so the loop isnt necessary anymore
+                        }
+                        
+                        if (i == (ordered_list->len - 1)) // if the item is to be placed at the end of the list
+                        {
+                            aux->next = no;
+                            no->previous = aux;
+                            no->next = NULL;
+                            
+                            break; // if the program reaches here, it has placed the item, so the loop isnt necessary anymore
+                        }
+                    }
+                    else if (item_get_type(item, ordered_list->sortingCriteria) == ITEM_DOUBLE)
+                    { // if its a double
+                        if (*((double *)get_field_content(aux->item, ordered_list->sortingCriteria)) < *((double *)get_field_content(item, ordered_list->sortingCriteria)))
+                        { // if the item of the position we are inspecting is smaller than the item to be inserted, we position our new node behind it
+                            no->next = aux;
+                            if (i == 0) // if the item is to be placed behind the current first node;
+                            {
+                                no->previous = NULL;
+                                ordered_list->start = no;
+                            }
+                            else
+                            {
+                                no->previous = aux->previous;
+                                aux->previous->next = no;
+                            }
+                            aux->previous = no;
+                            
+                            break; // if the program reaches here, it has placed the item, so the loop isnt necessary anymore
+                        }
+                        
+                        if (i == (ordered_list->len - 1)) // if the item is to be placed at the end of the list
+                        {
+                            aux->next = no;
+                            no->previous = aux;
+                            no->next = NULL;
+                            
+                            break; // if the program reaches here, it has placed the item, so the loop isnt necessary anymore
+                        }
+                    }
+                    else
+                    {
+                        printf("erro na insercao na lista cruzada; tipo invalido");
+                        return false;
+                    }
+                    
+                    // if it reaches here, it checked the position related to the current node aux is pointing to and the place wasnt aproppriate, so we move onto the next node
+                    aux = aux->next;
+                }
+            }
         }
     }
+        
+        
+        
+    //after intersion
     ordered_list->len += 1;
-
+        
     return true;
 }
 

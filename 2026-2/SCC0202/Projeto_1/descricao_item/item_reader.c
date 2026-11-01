@@ -131,6 +131,16 @@ int name_pos(const C_NOMES *c_nomes, const char *nome)
     return -1;
 }
 
+char* get_name_in_pos(const C_NOMES* c_nomes, int pos)
+{
+    if(c_nomes == NULL || pos < 0 || pos > MAX_CAMPOS)
+    {
+        return NULL;
+    }
+
+    return c_nomes->nomes[pos];
+}
+
 const DATATYPE *get_tipos(const C_NOMES *c_nomes)
 {
     return (c_nomes == NULL) ? NULL : c_nomes->tipos;

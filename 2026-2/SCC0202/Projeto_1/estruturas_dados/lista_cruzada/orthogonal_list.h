@@ -8,11 +8,11 @@ typedef struct node NODE;
 
 /**
  * @brief Cria CROSS_LIST
- * @param[in] INTs que indicam a posicao dos campos no vetor FIELDS do item usados para a ordenacao das linha e coluna respectivamente
+ * @param[in] vetor de INTs que vem do query e indica a posicao dos campos no vetor FIELDS do item usados para a ordenacao das linha e coluna respectivamente
+ * @param[in] vetor de ORDEMs que vem do query e indica quais as direcoes das ordenacoes das lista-linha e lista-coluna
  * @return Ponteiro para a CROSS_LIST ou NULL no caso de erros.
  */
-//Colocar de volta int lineCriteria, int columnCriteria
-CROSS_LIST *create_cross_list(void);
+CROSS_LIST *create_cross_list(int cross_fields_pos[2], ORDEM cross_dir[2]);
 
 /**
  * @brief Deleta CROSS_LIST

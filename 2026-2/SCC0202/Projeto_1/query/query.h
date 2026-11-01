@@ -9,9 +9,9 @@ typedef struct query QUERY;
 
 typedef enum ordem { ORDEM_ASC, ORDEM_DESC } ORDEM;
 
-extern QUERY *query_reader(const char *query_name);
+extern QUERY *query_reader(const char *query_name, C_NOMES* c_nomes);
 extern bool delete_query(QUERY *query);
-extern void print_query(const QUERY *query);
+extern void print_query(const QUERY *query, C_NOMES* c_nomes);
 
 /* ACCEPT */
 extern bool   query_has_accept(const QUERY *query);

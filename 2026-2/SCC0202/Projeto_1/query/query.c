@@ -34,14 +34,15 @@ struct query
     double accept;     // limiar mínimo da similaridade total
     /* CROSS */
     bool  has_cross;
-    CAMPO cross[2];
+    int cross_fields_pos[2];
+    ORDEM cross_dir[2];
     /* GROUP */
     CAMPO group[MAX_GROUP];   // níveis da lista generalizada (do mais externo ao mais interno)
     int   n_group;
     /* ORDER */
     bool  has_order;
     bool  order_by_sim;   // true: ORDER|similarity|...; false: usa order_campo
-    CAMPO order_campo;
+    int order_field_pos;
     ORDEM order_dir;
 };
 
@@ -117,7 +118,7 @@ static int read_campos(CAMPO *destino)
     }
     return n_campos;
 }
-QUERY *query_reader(const char *query_name)
+QUERY *query_reader(const char *query_name, C_NOMES* c_nomes)
 {
     FILE *query_file = fopen(query_name, "r");
     if (query_file == NULL)
@@ -196,13 +197,13 @@ QUERY *query_reader(const char *query_name)
             }
             else
             {
-                CAMPO campo = parse_campo(s_campo);
+                int campo = name_pos(c_nomes, s_campo);
                 if (campo == F_INVALID)
                 {
                     continue;   // campo inválido
                 }
                 query->order_by_sim = false;
-                query->order_campo = campo;
+                query->order_field_pos = campo;
             }
 
             query->order_dir = direcao;
@@ -217,18 +218,50 @@ QUERY *query_reader(const char *query_name)
         {
             char *s_campo1 = strtok(NULL, "|");
             char *s_campo2 = strtok(NULL, "|");
-            if (!s_campo1 || !s_campo2)
+            char *s_direcao1  = strtok(NULL, "|");
+            char *s_direcao2  = strtok(NULL, "|");
+            if (!s_campo1 || !s_campo2 ||!s_direcao1 || !s_direcao2)
             {
                 continue; //linha vazia
             }
-            CAMPO campo1 = parse_campo(s_campo1);
-            CAMPO campo2 = parse_campo(s_campo2);
+            int campo1 = name_pos(c_nomes, s_campo1);
+            int campo2 = name_pos(c_nomes, s_campo2);
             if (campo1 == F_INVALID || campo2 == F_INVALID)
             {
                  continue; //Campos inválidos
             }
-            query->cross[0] = campo1;
-            query->cross[1] = campo2;
+            
+            ORDEM direcao1;
+            if (strcmp(s_direcao1, "ASCE") == 0)
+            {
+                direcao1 = ORDEM_ASC;
+            }
+            else if (strcmp(s_direcao1, "DESC") == 0)
+            {
+                direcao1 = ORDEM_DESC;
+            }
+            else
+            {
+                continue; // direção inválida
+            }
+            ORDEM direcao2;
+            if (strcmp(s_direcao2, "ASCE") == 0)
+            {
+                direcao2 = ORDEM_ASC;
+            }
+            else if (strcmp(s_direcao2, "DESC") == 0)
+            {
+                direcao2 = ORDEM_DESC;
+            }
+            else
+            {
+                continue; // direção inválida
+            }
+
+            query->cross_fields_pos[0] = campo1;
+            query->cross_fields_pos[1] = campo2;
+            query->cross_dir[0] = direcao1;
+            query->cross_dir[1] = direcao2;
             query->has_cross = true;
         }
              else if (strcmp(tipo, "FILTER") == 0)
@@ -255,13 +288,13 @@ QUERY *query_reader(const char *query_name)
 }
 
 //Teste se a leitura funcionou
-void print_query(const QUERY *query)
+void print_query(const QUERY *query, C_NOMES* c_nomes)
 {
     printf("Numero de SIMS: %d\n", query->n_sims);
     for (int i = 0; i < query->n_sims; i++)
     {
         const SIM *s = query->sims[i];
-        printf("%s|%lf|%lf|%lf\n", campo_nome(get_sim_campo(s)),get_sim_alvo(s), get_sim_tolerancia(s), get_sim_peso(s));
+        printf("%s|%lf|%lf|%lf\n", get_name_in_pos(c_nomes, get_sim_campo(s)),get_sim_alvo(s), get_sim_tolerancia(s), get_sim_peso(s));
     }
     if (query->has_accept)
     {
@@ -269,20 +302,20 @@ void print_query(const QUERY *query)
     }
     if (query->has_cross)
     {
-        printf("CROSS: %s|%s\n", campo_nome(query->cross[0]),campo_nome(query->cross[1]));
+        printf("CROSS: %s|%s\n", get_name_in_pos(c_nomes, query->cross_fields_pos[0]),get_name_in_pos(c_nomes, query->cross_fields_pos[1]));
     }
     if(query->n_group > 0)
     {
         printf("GROUP:");
         for (int i = 0; i < query->n_group; i++)
         {
-            printf(" %s", campo_nome(query->group[i]));
+            printf(" %s", campo_nome(query->group[i])); //talvez precise alterar isso pra um int e usar o get_name_in_pos
         }
         printf("\n");
     }
     if (query->has_order)
     {
-        printf("ORDER: %s %s\n",query->order_by_sim ? "similarity" : campo_nome(query->order_campo),query->order_dir == ORDEM_ASC ? "ASC" : "DESC");
+        printf("ORDER: %s %s\n",query->order_by_sim ? "similarity" : get_name_in_pos(c_nomes, query->order_field_pos),query->order_dir == ORDEM_ASC ? "ASC" : "DESC");
     }
 }
 /* ACCEPT */
@@ -307,13 +340,13 @@ extern bool query_order_by_similarity(const QUERY *query)
 {
     return query != NULL && query->has_order && query->order_by_sim;
 }
-extern CAMPO query_order_campo(const QUERY *query)
+extern int query_order_campo(const QUERY *query)
 {
     if (query == NULL || !query->has_order || query->order_by_sim)
     {
         return F_INVALID;
     }
-    return query->order_campo;
+    return query->order_field_pos;
 }
 extern ORDEM query_order_dir(const QUERY *query)
 {
@@ -337,13 +370,13 @@ extern bool query_has_cross(const QUERY *query)
 {
     return (query == NULL) ? false : query->has_cross;
 }
-extern CAMPO query_cross(const QUERY *query, int i)
+extern int query_cross(const QUERY *query, int i)
 {
     if (query == NULL || query->has_cross == false || i < 0 || i > 1)
     {
         return F_INVALID;
     }
-    return query->cross[i];
+    return query->cross_fields_pos[i];
 }
 /* FILTER */
 extern int query_n_filters(const QUERY *query)

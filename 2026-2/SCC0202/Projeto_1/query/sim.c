@@ -7,7 +7,7 @@
 
 struct sim
 {
-    CAMPO campo;
+    int campo;
     double alvo;
     double tolerancia;
     double peso;
@@ -51,6 +51,15 @@ extern double similarity(SIM *sim)
     return result;
 }
 
+extern double calculate_similarity(SIM *sim, double x)
+{
+    double q = sim->alvo;
+    double t = sim->tolerancia;
+    double result = fmax(0.0, 1 - (fabs(x-q)/t));
+
+    return result;
+}
+
 extern double total_similarity(SIM *sim[], int total_sim)
 {
     //A similaridade total será a média ponderada dos critérios SIM
@@ -73,7 +82,7 @@ extern double total_similarity(SIM *sim[], int total_sim)
     return media_ponderada;
 }
 
-extern CAMPO get_sim_campo(const SIM *sim)
+extern int get_sim_campo(const SIM *sim)
 {
     return (sim == NULL) ? F_INVALID : sim->campo;
 }

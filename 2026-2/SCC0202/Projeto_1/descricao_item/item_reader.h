@@ -24,6 +24,9 @@ DATATYPE get_tipo(const C_NOMES *c_nomes, int i);
 /* Posição do campo com esse nome, ou -1 se não existir. */
 int name_pos(const C_NOMES *c_nomes, const char *nome);
 
+/* Retorna nome do campo na posição pos */
+char* get_name_in_pos(const C_NOMES* c_nomes, int pos);
+
 /* Vetor de tipos e quantidade de campos, para passar ao reader. */
 const DATATYPE *get_tipos(const C_NOMES *c_nomes);
 int get_n_campos(const C_NOMES *c_nomes);
