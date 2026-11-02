@@ -1,7 +1,7 @@
 #ifndef QUERY_H
 #define QUERY_H
 #include "filter.h"
-
+#include "../descricao_item/item_reader.h"
 #include <stdbool.h>
 #include "../nasa.h"
 
@@ -19,14 +19,14 @@ extern double query_accept(const QUERY *query);
 /* ORDER */
 extern bool  query_has_order(const QUERY *query);
 extern bool  query_order_by_similarity(const QUERY *query);
-extern CAMPO query_order_campo(const QUERY *query);
+extern int query_order_campo(const QUERY *query);
 extern ORDEM query_order_dir(const QUERY *query);
 /* GROUP */
 extern int   query_n_group(const QUERY *query);
-extern CAMPO query_group(const QUERY *query, int i);   // i = 0 é o nível mais externo
+extern int query_group(const QUERY *query, int i);  // i = 0 é o nível mais externo
 /* CROSS */
 extern bool  query_has_cross(const QUERY *query);
-extern CAMPO query_cross(const QUERY *query, int i);   // i = 0 ou 1
+extern int query_cross(const QUERY *query, int i);  // i = 0 ou 1
 
 //FILTER//
 extern const FILTER *query_get_filter(const QUERY *query, int i);

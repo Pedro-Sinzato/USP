@@ -37,7 +37,7 @@ struct query
     int cross_fields_pos[2];
     ORDEM cross_dir[2];
     /* GROUP */
-    CAMPO group[MAX_GROUP];   // níveis da lista generalizada (do mais externo ao mais interno)
+    int group[MAX_GROUP];   // níveis da lista generalizada (do mais externo ao mais interno)
     int   n_group;
     /* ORDER */
     bool  has_order;
@@ -74,7 +74,7 @@ extern bool delete_query(QUERY *query)
     return true;
 }
 
-static bool add_sim(QUERY *query, CAMPO campo, double alvo, double tol, double peso)
+static bool add_sim(QUERY *query, int campo, double alvo, double tol, double peso)
 {
     if (query->n_sims >= MAX_SIMS) return false;
     SIM *sim = create_sim(campo, alvo, tol, peso);
@@ -83,7 +83,7 @@ static bool add_sim(QUERY *query, CAMPO campo, double alvo, double tol, double p
     return true;
 }
 
-static bool add_filter(QUERY *query, CAMPO campo,
+static bool add_filter(QUERY *query, int campo,
                        const char *operador, const char *valor)
 {
     if (query == NULL || query->n_filters >= MAX_FILTERS)
@@ -101,21 +101,24 @@ static bool add_filter(QUERY *query, CAMPO campo,
 
 // Lê até MAX_GROUP campos da linha atual.
 // Retorna a quantidade lida, ou -1 se algum campo for inválido.
-static int read_campos(CAMPO *destino)
+static int read_campos(int *destino, const C_NOMES *c_nomes)
 {
     int n_campos = 0;
-    char *tolken;
+    char *token;
 
-    while (n_campos < MAX_GROUP && (tolken = strtok(NULL, "|")) != NULL)
+    while ((token = strtok(NULL, "|")) != NULL)
     {
-        CAMPO campo = parse_campo(tolken);
-        if (campo == F_INVALID)
-        {
+        if (n_campos >= MAX_GROUP)
             return -1;
-        }
-        destino[n_campos] = campo;
-        n_campos++;
+
+        int campo = name_pos(c_nomes, token);
+
+        if (campo < 0)
+            return -1;
+
+        destino[n_campos++] = campo;
     }
+
     return n_campos;
 }
 QUERY *query_reader(const char *query_name, C_NOMES* c_nomes)
@@ -151,10 +154,10 @@ QUERY *query_reader(const char *query_name, C_NOMES* c_nomes)
             char *s_peso  = strtok(NULL, "|");
             if (!s_campo || !s_alvo || !s_tol || !s_peso) continue;
 
-            CAMPO campo = parse_campo(s_campo);
-            if (campo == F_INVALID) continue;
+            int campo = name_pos(c_nomes, s_campo);
+            if (campo < 0) continue;
 
-            add_sim(query, campo, strtod(s_alvo, NULL),strtod(s_tol, NULL), strtod(s_peso, NULL));
+            add_sim(query,campo, strtod(s_alvo, NULL),strtod(s_tol, NULL), strtod(s_peso, NULL));
         }
         else if (strcmp(tipo, "ACCEPT") == 0)
         {
@@ -164,7 +167,6 @@ QUERY *query_reader(const char *query_name, C_NOMES* c_nomes)
             char *fim;
             double limiar = strtod(s_limiar, &fim);
             if (fim == s_limiar) continue;     // não era um número
-
             query->accept = limiar;
             query->has_accept = true;
         }
@@ -198,7 +200,7 @@ QUERY *query_reader(const char *query_name, C_NOMES* c_nomes)
             else
             {
                 int campo = name_pos(c_nomes, s_campo);
-                if (campo == F_INVALID)
+                if (campo < 0)
                 {
                     continue;   // campo inválido
                 }
@@ -211,7 +213,7 @@ QUERY *query_reader(const char *query_name, C_NOMES* c_nomes)
         }
         else if (strcmp(tipo, "GROUP") == 0)
         {
-            int n_campos = read_campos(query->group);
+            int n_campos = read_campos(query->group, c_nomes);
             query->n_group = (n_campos < 0) ? 0 : n_campos; //Se algum campo for inválido, a linha inteira é ignorada
         }
         else if (strcmp(tipo, "CROSS") == 0)
@@ -226,7 +228,7 @@ QUERY *query_reader(const char *query_name, C_NOMES* c_nomes)
             }
             int campo1 = name_pos(c_nomes, s_campo1);
             int campo2 = name_pos(c_nomes, s_campo2);
-            if (campo1 == F_INVALID || campo2 == F_INVALID)
+            if (campo1 < 0 || campo2 < 0)
             {
                  continue; //Campos inválidos
             }
@@ -273,10 +275,10 @@ QUERY *query_reader(const char *query_name, C_NOMES* c_nomes)
             if (s_campo == NULL || s_operador == NULL || s_valor == NULL)
                 continue;
 
-            CAMPO campo = parse_campo(s_campo);
+            int campo = name_pos(c_nomes, s_campo);
 
-            if (campo == F_INVALID)
-                continue;
+            if (campo < 0)
+             continue;
 
             add_filter(query, campo, s_operador, s_valor);
         }
@@ -309,7 +311,8 @@ void print_query(const QUERY *query, C_NOMES* c_nomes)
         printf("GROUP:");
         for (int i = 0; i < query->n_group; i++)
         {
-            printf(" %s", campo_nome(query->group[i])); //talvez precise alterar isso pra um int e usar o get_name_in_pos
+        //ja alterei, ta safe
+        printf(" %s", get_name_in_pos(c_nomes, query->group[i]));//talvez precise alterar isso pra um int e usar o get_name_in_pos
         }
         printf("\n");
     }
@@ -344,7 +347,7 @@ extern int query_order_campo(const QUERY *query)
 {
     if (query == NULL || !query->has_order || query->order_by_sim)
     {
-        return F_INVALID;
+        return -1;
     }
     return query->order_field_pos;
 }
@@ -357,12 +360,11 @@ extern int query_n_group(const QUERY *query)
 {
     return (query == NULL) ? 0 : query->n_group;
 }
-extern CAMPO query_group(const QUERY *query, int i)
+extern int query_group(const QUERY *query, int i)
 {
     if (query == NULL || i < 0 || i >= query->n_group)
-    {
-        return F_INVALID;
-    }
+        return -1;
+
     return query->group[i];
 }
 /* CROSS */
@@ -374,7 +376,7 @@ extern int query_cross(const QUERY *query, int i)
 {
     if (query == NULL || query->has_cross == false || i < 0 || i > 1)
     {
-        return F_INVALID;
+        return -1;
     }
     return query->cross_fields_pos[i];
 }

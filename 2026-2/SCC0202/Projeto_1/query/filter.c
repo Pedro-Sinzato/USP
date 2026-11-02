@@ -3,37 +3,10 @@
 #include <string.h>
 
 #include "filter.h"
-#include "campo.h"
-
-union condicao
-{
-    bool boleano;
-    double valor;
-};
 
 struct filter
 {
-    CAMPO campo;
-    char *operador;
-    CONDICAO condicao;
-};
-
-extern FILTER *create_filter(CAMPO campo, char operador[3], CONDICAO condicao)
-{
-    FILTER *filter = calloc(1, sizeof(FILTER));
-    if(filter == NULL)
-    {
-        return NULL;
-    }
-
-    filter->campo = campo;
-    filter->operador = operador;
-
-    return filter;
-}
-
-extern OPERADOR parse_operador(const char *operador)
-{
+    int campo;
     OPERADOR operador;
     char *valor;
 };
@@ -53,11 +26,10 @@ OPERADOR parse_operador(const char *operador)
 }
 
 // Cria um filtro e armazena o campo, operador e valor
-FILTER *create_filter(CAMPO campo, const char *operador,
+FILTER *create_filter(int campo, const char *operador,
                       const char *valor)
 {
-    if (campo < 0 || campo >= NASA_N_CAMPOS ||
-        operador == NULL || valor == NULL)
+    if (campo < 0 || operador == NULL || valor == NULL)
         return NULL;
 
     OPERADOR op = parse_operador(operador);
@@ -141,7 +113,7 @@ bool apply_filter(const ITEM *item, const FILTER *filter)
     if (item == NULL || filter == NULL)
         return false;
 
-    int pos = (int)filter->campo;
+    int pos = filter->campo;
 
     DATATYPE tipo = item_get_type(item, pos);
     const void *conteudo = get_field_content(item, pos);

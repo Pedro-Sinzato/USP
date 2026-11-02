@@ -3,7 +3,7 @@
 #include <math.h>
 
 #include "sim.h"
-#include "../nasa.h"
+
 
 struct sim
 {
@@ -13,7 +13,7 @@ struct sim
     double peso;
 };
 
-extern SIM *create_sim(CAMPO campo, double alvo, double tolerancia, double peso)
+extern SIM *create_sim(int campo, double alvo, double tolerancia, double peso)
 {
     SIM *sim = calloc(1, sizeof(SIM));
     if(sim == NULL)
@@ -84,7 +84,7 @@ extern double total_similarity(SIM *sim[], int total_sim)
 
 extern int get_sim_campo(const SIM *sim)
 {
-    return (sim == NULL) ? F_INVALID : sim->campo;
+    return (sim == NULL) ? -1 : sim->campo;
 }
 extern double get_sim_alvo(const SIM *sim)
 {
