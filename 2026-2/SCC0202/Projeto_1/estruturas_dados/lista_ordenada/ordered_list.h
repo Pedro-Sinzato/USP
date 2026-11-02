@@ -8,10 +8,13 @@ typedef struct node NODE;
 
 /**
  * @brief Cria ORDERED_LIST
+ * @param[in] bool que indica se a lista vai ser ordenada por similaridade
  * @param[in] INT que indica a posicao do campo no vetor FIELDS do item usado para a ordenacao das lista
+ * @param[in] ORDEM indica se a lista vai ser ordenada de forma ascendente ou descendente
+ * @param[in] SIM campo de similaridade do query; se nao houver ordenacao por similaridade, colococar NULL
  * @return Ponteiro para a ORDERED_LIST ou NULL no caso de erros.
  */
-extern ORDERED_LIST *create_ordered_list(void);
+ORDERED_LIST *create_ordered_list(bool order_by_sim, int sortingCriteria, ORDEM order_dir, SIM *sim);
 
 /**
  * @brief Deleta ORDERED_LIST

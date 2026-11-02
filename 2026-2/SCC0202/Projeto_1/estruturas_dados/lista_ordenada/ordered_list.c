@@ -184,6 +184,12 @@ bool ordered_list_add_item(ORDERED_LIST *ordered_list, ITEM *item)
         
         if(ordered_list->order_by_sim)
         {
+            if(ordered_list->sim == NULL)
+            {
+                printf("Lista ordenada sem parametro para calcular similaridade");
+                return false;
+            }
+
             if(item_get_type(item, ordered_list->sortingCriteria) == ITEM_BOOL || item_get_type(item, ordered_list->sortingCriteria) == ITEM_STRING)
             {
                 printf("tipo invalido para ordenar por similaridade");
@@ -202,8 +208,8 @@ bool ordered_list_add_item(ORDERED_LIST *ordered_list, ITEM *item)
                     // comparing numeric
                     else if (item_get_type(item, ordered_list->sortingCriteria) == ITEM_INT)
                     { // if its an integer
-                        if (*((int *)get_field_content(aux->item, ordered_list->sortingCriteria)) > *((int *)get_field_content(item, ordered_list->sortingCriteria)))
-                        { // if the item of the position we are inspecting is bigger than the item to be inserted, we position our new node behind it
+                        if (calculate_similarity(ordered_list->sim, (double)(*((int *)get_field_content(aux->item, ordered_list->sortingCriteria)))) > calculate_similarity(ordered_list->sim, (double)(*((int *)get_field_content(item, ordered_list->sortingCriteria)))))
+                        { // if the item of the position we are inspecting is more similar than the item to be inserted, we position our new node behind it
                             no->next = aux;
                             if (i == 0) // if the item is to be placed behind the current first node;
                             {
@@ -231,8 +237,8 @@ bool ordered_list_add_item(ORDERED_LIST *ordered_list, ITEM *item)
                     }
                     else if (item_get_type(item, ordered_list->sortingCriteria) == ITEM_DOUBLE)
                     { // if its a double
-                        if (*((double *)get_field_content(aux->item, ordered_list->sortingCriteria)) > *((double *)get_field_content(item, ordered_list->sortingCriteria)))
-                        { // if the item of the position we are inspecting is bigger than the item to be inserted, we position our new node behind it
+                        if (calculate_similarity(ordered_list->sim, *((double *)get_field_content(aux->item, ordered_list->sortingCriteria))) > calculate_similarity(ordered_list->sim, *((double *)get_field_content(item, ordered_list->sortingCriteria))))
+                        { // if the item of the position we are inspecting is more similar than the item to be inserted, we position our new node behind it
                             no->next = aux;
                             if (i == 0) // if the item is to be placed behind the current first node;
                             {
@@ -280,8 +286,8 @@ bool ordered_list_add_item(ORDERED_LIST *ordered_list, ITEM *item)
                     // pega qual tipo de comparacao usar
                     else if (item_get_type(item, ordered_list->sortingCriteria) == ITEM_INT)
                     { // if its an integer
-                        if (*((int *)get_field_content(aux->item, ordered_list->sortingCriteria)) < *((int *)get_field_content(item, ordered_list->sortingCriteria)))
-                        { // if the item of the position we are inspecting is smaller than the item to be inserted, we position our new node behind it
+                        if (calculate_similarity(ordered_list->sim, (double)(*((int *)get_field_content(aux->item, ordered_list->sortingCriteria)))) < calculate_similarity(ordered_list->sim, (double)(*((int *)get_field_content(item, ordered_list->sortingCriteria)))))
+                        { // if the item of the position we are inspecting is less similar than the item to be inserted, we position our new node behind it
                             no->next = aux;
                             if (i == 0) // if the item is to be placed behind the current first node;
                             {
@@ -309,8 +315,8 @@ bool ordered_list_add_item(ORDERED_LIST *ordered_list, ITEM *item)
                     }
                     else if (item_get_type(item, ordered_list->sortingCriteria) == ITEM_DOUBLE)
                     { // if its a double
-                        if (*((double *)get_field_content(aux->item, ordered_list->sortingCriteria)) < *((double *)get_field_content(item, ordered_list->sortingCriteria)))
-                        { // if the item of the position we are inspecting is smaller than the item to be inserted, we position our new node behind it
+                        if (calculate_similarity(ordered_list->sim, *((double *)get_field_content(aux->item, ordered_list->sortingCriteria))) < calculate_similarity(ordered_list->sim, *((double *)get_field_content(item, ordered_list->sortingCriteria))))
+                        { // if the item of the position we are inspecting is less simillar than the item to be inserted, we position our new node behind it
                             no->next = aux;
                             if (i == 0) // if the item is to be placed behind the current first node;
                             {
