@@ -1,6 +1,6 @@
 #ifndef SIM_H
 #define SIM_H
-
+#include <stdbool.h>
 #include "../nasa.h"
 
 /**
@@ -20,7 +20,7 @@ typedef struct sim SIM;
  * @param[in] Peso do SIM.
  * @return Ponteiro para o SIM criado, se não conseguir, Ponteiro para NULL.
  */
-extern SIM *create_sim(CAMPO campo, double alvo, double tolerancia, double peso);
+extern SIM *create_sim(int campo, double alvo, double tolerancia, double peso);
 extern bool delete_sim(SIM **sim);
 /**
  * @brief Calcula a SIMILARIDADE de um SIM.
