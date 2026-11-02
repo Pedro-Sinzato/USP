@@ -23,11 +23,8 @@ typedef struct filter FILTER;
 
 // Cria um filtro com campo, operador e valor
 // Retorna NULL em caso de erro
-extern FILTER *create_filter(
-    CAMPO campo,
-    const char *operador,
-    const char *valor
-);
+extern FILTER *create_filter(int campo, const char *operador,
+                      const char *valor);
 
 // Libera a memória de um filtro
 extern bool delete_filter(FILTER **filter);

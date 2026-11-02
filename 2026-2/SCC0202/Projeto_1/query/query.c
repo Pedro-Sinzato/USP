@@ -83,7 +83,7 @@ static bool add_sim(QUERY *query, CAMPO campo, double alvo, double tol, double p
     return true;
 }
 
-static bool add_filter(QUERY *query, CAMPO campo,
+static bool add_filter(QUERY *query, int campo,
                        const char *operador, const char *valor)
 {
     if (query == NULL || query->n_filters >= MAX_FILTERS)
@@ -273,10 +273,10 @@ QUERY *query_reader(const char *query_name, C_NOMES* c_nomes)
             if (s_campo == NULL || s_operador == NULL || s_valor == NULL)
                 continue;
 
-            CAMPO campo = parse_campo(s_campo);
+            int campo = name_pos(c_nomes, s_campo);
 
-            if (campo == F_INVALID)
-                continue;
+            if (campo < 0)
+             continue;
 
             add_filter(query, campo, s_operador, s_valor);
         }
