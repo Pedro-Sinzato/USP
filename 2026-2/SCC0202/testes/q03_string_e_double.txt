@@ -1,0 +1,2 @@
+FILTER|threat_category|==|Critica
+FILTER|distance_au|<|0.35

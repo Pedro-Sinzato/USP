@@ -1,0 +1,19 @@
+asteroid_designation,asteroid_fullname,close_approach_date,year,month,distance_au,velocity_km_s,absolute_magnitude,days_until_approach,is_past_event,is_future_event,risk_score,panic_level,threat_category,panic_verdict,on_sentry_list,sentry_impact_prob,sentry_torino_scale,sentry_palermo_scale,sentry_diameter_km
+T17,(T17) Rocha 17,2022-02-15,2022,2,0.3,28.5,22.5,-1458,True,False,1,7,Media,nivel 7,False,0.017,1,-8.5,0.85
+T14,(T14) Rocha 14,2026-11-15,2026,11,0.075,24,21,11,False,True,0.95,9,Critica,nivel 9,False,0.014,2,-7,0.7
+T11,(T11) Rocha 11,2028-08-15,2028,8,0.35,19.5,19.5,738,False,True,0.9,0,Baixa,nivel 0,False,0.011,3,-5.5,0.55
+T08,(T08) Rocha 8,2025-05-15,2025,5,0.125,15,18,-360,True,False,0.85,2,Alta,nivel 2,True,0.008,0,-4,0.4
+T05,(T05) Rocha 5,2022-02-15,2022,2,0.4,10.5,16.5,-1458,True,False,0.8,4,Critica,nivel 4,False,0.005,1,-2.5,0.25
+T19,(T19) Rocha 19,2029-12-15,2029,12,0.45,31.5,23.5,1107,False,True,0.7,2,Alta,nivel 2,False,0.019,3,-9.5,0.95
+T16,(T16) Rocha 16,2024-09-15,2024,9,0.225,27,22,-721,True,False,0.65,4,Baixa,nivel 4,True,0.016,0,-8,0.8
+T13,(T13) Rocha 13,2030-06-15,2030,6,0.5,22.5,20.5,1466,False,True,0.6,6,Alta,nivel 6,False,0.013,1,-6.5,0.65
+T10,(T10) Rocha 10,2027-03-15,2027,3,0.275,18,19,368,False,True,0.55,8,Nenhuma,nivel 8,False,0.01,2,-5,0.5
+T07,"(T07) Rock, ""Big"" One",2024-12-15,2024,12,0.05,13.5,17.5,-718,True,False,0.5,10,Media,nivel 10,False,0.007,3,-3.5,0.35
+T04,(T04) Rocha 4,2021-09-15,2021,9,0.325,9,16,-1816,True,False,0.45,1,Alta,nivel 1,True,0.004,0,-2,0.2
+T18,(T18) Rocha 18,2020-07-15,2020,7,0.375,30,23,-2183,True,False,0.35,10,Critica,nivel 10,False,0.018,2,-9,0.9
+T15,(T15) Rocha 15,2027-04-15,2027,4,0.15,25.5,21.5,369,False,True,0.3,1,Alta,nivel 1,False,0.015,3,-7.5,0.75
+T12,(T12) Rocha 12,2029-01-15,2029,1,0.425,21,20,1096,False,True,0.25,3,Media,nivel 3,True,0.012,0,-6,0.6
+T09,(T09) Rocha 9,2026-10-15,2026,10,0.2,16.5,18.5,10,False,True,0.2,5,Critica,nivel 5,False,0.009,1,-4.5,0.45
+T06,(T06) Rocha 6,2023-07-15,2023,7,0.475,12,17,-1088,True,False,0.15,7,Baixa,nivel 7,False,0.006,2,-3,0.3
+T03,(T03) Rocha 3,2020-04-15,2020,4,0.25,7.5,15.5,-2186,True,False,0.1,9,Media,nivel 9,False,0.003,3,-1.5,0.15
+T20,(T20) Rocha 20,2025-05-15,2025,5,0.025,33,24,-360,True,False,0.05,5,Nenhuma,nivel 5,True,0.02,0,-10,1
