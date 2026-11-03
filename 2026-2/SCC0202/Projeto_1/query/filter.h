@@ -3,7 +3,6 @@
 #define FILTER_H
 
 #include <stdbool.h>
-#include "../nasa.h"
 #include "../estruturas_dados/item.h"
 
 // Operadores de comparação disponíveis
@@ -32,8 +31,7 @@ extern bool delete_filter(FILTER **filter);
 // Converte uma string em um OPERADOR
 extern OPERADOR parse_operador(const char *operador);
 
-
-// ele olha se um ITEM satisfaz o filtro e  retorna true se satisfaz e false caso contrário 
+// Verifica se um ITEM satisfaz o filtro e retorna true se satisfaz e false caso contrário
 extern bool apply_filter(const ITEM *item, const FILTER *filter);
 
 #endif

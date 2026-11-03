@@ -41,16 +41,6 @@ extern bool delete_sim(SIM **sim)
     return true;
 }
 
-extern double similarity(SIM *sim)
-{
-    int x = 0; //Não sei de onde vem esse x
-    double q = sim->alvo;
-    double t = sim->tolerancia;
-    double result = fmax(0.0, 1 - (fabs(x-q)/t));
-
-    return result;
-}
-
 extern double calculate_similarity(SIM *sim, double x)
 {
     double q = sim->alvo;
@@ -60,26 +50,40 @@ extern double calculate_similarity(SIM *sim, double x)
     return result;
 }
 
-extern double total_similarity(SIM *sim[], int total_sim)
+extern double total_similarity(SIM *const sim[], int total_sim, const ITEM *item)
 {
-    //A similaridade total será a média ponderada dos critérios SIM
-    double total_similarity = 0;
-    double total_peso = 0;
-
-    if(sim == NULL)
+    // A similaridade total é a média ponderada dos critérios SIM
+    if (sim == NULL || total_sim <= 0 || item == NULL)
     {
-        //Não há SIM
         return -1;
     }
-    for(int i  = 0; i < total_sim; i++)
+
+    double soma = 0;
+    double total_peso = 0;
+
+    for (int i = 0; i < total_sim; i++)
     {
-        total_similarity += similarity(sim[i]) * sim[i]->peso;
-        total_peso+= sim[i]->peso;
+        double valor_sim = 0;
+        const void *conteudo = get_field_content(item, sim[i]->campo);
+
+        if (conteudo != NULL)
+        {
+            DATATYPE tipo = item_get_type(item, sim[i]->campo);
+            if (tipo == ITEM_INT)
+            {
+                valor_sim = calculate_similarity(sim[i], (double)*(const int *)conteudo);
+            }
+            else if (tipo == ITEM_DOUBLE)
+            {
+                valor_sim = calculate_similarity(sim[i], *(const double *)conteudo);
+            }
+        }
+
+        soma += valor_sim * sim[i]->peso;
+        total_peso += sim[i]->peso;
     }
 
-    double media_ponderada = total_similarity / total_peso;
-
-    return media_ponderada;
+    return (total_peso > 0) ? soma / total_peso : -1;
 }
 
 extern int get_sim_campo(const SIM *sim)

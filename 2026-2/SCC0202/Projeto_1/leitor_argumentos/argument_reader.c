@@ -5,7 +5,7 @@
 
 #include "argument_reader.h"
 
-#define ARG_MAX_LEN 32
+#define ARG_MAX_LEN 256
 
 struct arguments
 {
@@ -53,22 +53,38 @@ static void copy_arg(char *destino, const char *arg_word)
 
 extern bool argument_parser(int argc, char *argv[], ARGUMENTS *arguments)
 {
-    for (int i = 1; i + 1 < argc; i += 2)
+    if (arguments == NULL)
     {
-        const char *flag  = argv[i];
+        return false;
+    }
+
+    for (int i = 1; i < argc; i += 2)
+    {
+        const char *flag = argv[i];
+
+        if (i + 1 >= argc)
+        {
+            fprintf(stderr, "flag '%s' sem valor\n", flag);
+            return false;
+        }
+
         const char *value = argv[i + 1];
 
-        if      (strcmp(flag, "-reader") == 0) copy_arg(arguments->reader, value);
-        else if (strcmp(flag, "-input")  == 0) copy_arg(arguments->input,  value);
-        else if (strcmp(flag, "-base")   == 0) copy_arg(arguments->base,   value);
-        else if (strcmp(flag, "-result") == 0) copy_arg(arguments->result, value);
-        else if (strcmp(flag, "-query")  == 0) copy_arg(arguments->query,  value);
-        else if (strcmp(flag, "-output") == 0) copy_arg(arguments->output, value);
-        else if (strcmp(flag, "-top-k") == 0) arguments->top_k = strtoull(value, NULL, 10);
-        else if (strcmp(flag, "-limit") == 0) arguments->limit = strtoull(value, NULL, 10);
+        /* aceita --flag */
+        if (flag[0] == '-') flag++;
+        if (flag[0] == '-') flag++;
+
+        if      (strcmp(flag, "reader") == 0) copy_arg(arguments->reader, value);
+        else if (strcmp(flag, "input")  == 0) copy_arg(arguments->input,  value);
+        else if (strcmp(flag, "base")   == 0) copy_arg(arguments->base,   value);
+        else if (strcmp(flag, "result") == 0) copy_arg(arguments->result, value);
+        else if (strcmp(flag, "query")  == 0) copy_arg(arguments->query,  value);
+        else if (strcmp(flag, "output") == 0) copy_arg(arguments->output, value);
+        else if (strcmp(flag, "top-k")  == 0) arguments->top_k = strtoull(value, NULL, 10);
+        else if (strcmp(flag, "limit")  == 0) arguments->limit = strtoull(value, NULL, 10);
         else
         {
-            fprintf(stderr, "flag desconhecida: '%s'\n", flag);
+            fprintf(stderr, "flag desconhecida: '%s'\n", argv[i]);
             return false;
         }
     }

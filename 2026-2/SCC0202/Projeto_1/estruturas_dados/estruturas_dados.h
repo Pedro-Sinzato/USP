@@ -4,6 +4,7 @@
 #include <stdbool.h>
 
 #include "../estruturas_dados/item.h"
+#include "../query/query.h"
 
 typedef enum estrutura_dados_types
 {
@@ -57,10 +58,14 @@ extern ED_TYPES ed_type_from_name(const char *name);
 /**
  * @brief Cria a estrutura de dados do tipo pedido.
  * @param[in] type Tipo da estrutura (PILHA, FILA, ...).
+ * @param[in] query QUERY já lida, ou NULL. lista_ord (ORDER), lista_cruz (CROSS)
+ * e lista_gen (GROUP) se organizam por ela; sem a seção correspondente (ou com
+ * query NULL) usam o padrão: primeiro campo ascendente, ou sem agrupamento.
+ * As demais estruturas ignoram a query.
  * @return Ponteiro para a estrutura, ou NULL se o tipo ainda não foi
  * implementado ou faltou memória.
  */
-extern ED *create_ed(ED_TYPES type);
+extern ED *create_ed(ED_TYPES type, const QUERY *query);
 
 /**
  * @brief Apaga a estrutura e todos os ITEMs que ainda estiverem nela.
@@ -76,9 +81,6 @@ extern bool destroy_ed(ED **self);
  * @return true se conseguiu, false caso contrário.
  */
 extern bool insert_ed(ED *self, ITEM *item);
-
-/* Imprime a estrutura, qualquer que seja o tipo (para depuração; apagar depois). */
-extern void print_ed(const ED *self);
 
 /**
  * @brief Percorre os ITEMs da estrutura, sem alterá-la, chamando visit para

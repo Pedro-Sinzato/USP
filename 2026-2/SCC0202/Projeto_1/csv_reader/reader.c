@@ -8,10 +8,10 @@
 #include "../estruturas_dados/item.h"
 #include "../leitor_argumentos/argument_reader.h"
 
-#define LINE_SIZE 1024
+#define LINE_SIZE 2048
 
 // Devolve o próximo campo da linha e avança *cursor para o campo seguinte.
-// Respeita aspas e campos vazios. Devolve NULL se não há mais campos
+// Respeita aspas (inclusive "" como aspa literal) e campos vazios. Devolve NULL se não há mais campos
 // ou se há aspas sem fechar. Quando o último campo é lido, *cursor vira NULL.
 static char *next_field(char **cursor)
 {
@@ -24,14 +24,29 @@ static char *next_field(char **cursor)
     if (*start == '"')                      // campo entre aspas, tipo string "nome sobrenome"
     {
         start++;
-        char *end = strchr(start, '"');
-        if (end == NULL)
+        char *read = start;                 // desfaz as aspas dobradas ("" vira ") no próprio buffer
+        char *write = start;
+        for (;;)
         {
-            *cursor = NULL;
-            return NULL;
+            if (*read == '\0')              // aspas sem fechar
+            {
+                *cursor = NULL;
+                return NULL;
+            }
+            if (*read == '"')
+            {
+                if (read[1] == '"')         // "" dentro do campo: aspa literal
+                {
+                    *write++ = '"';
+                    read += 2;
+                    continue;
+                }
+                break;                      // aspa que fecha o campo
+            }
+            *write++ = *read++;
         }
-        *end = '\0';
-        comma = strchr(end + 1, ',');
+        *write = '\0';
+        comma = strchr(read + 1, ',');
     }
     else
     {

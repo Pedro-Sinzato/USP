@@ -21,7 +21,6 @@ struct lista_cabeca
     int tamanho;
 };
 
-/* Adaptadores da vtable: ED ** / ED * -> HEAD_LIST ** / HEAD_LIST * */
 static bool lista_cabeca_destroy(ED **self)
 {
     if (self == NULL || *self == NULL)

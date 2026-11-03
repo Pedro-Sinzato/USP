@@ -16,7 +16,7 @@ bool destroy_c_nomes(C_NOMES **c_nomes);
 /* Lê o arquivo indicado por get_reader(args). Cada linha: nome|tipo,
  * com tipo em {int, double, char, bool, string}.
  * Devolve false em qualquer erro (o chamador ainda deve destruir c_nomes). */
-bool read_item(char *file, C_NOMES *c_nomes);
+bool read_item(const char *file, C_NOMES *c_nomes);
 
 /* Tipo do campo i, ou ITEM_INVALID se c_nomes for NULL ou i for inválido. */
 DATATYPE get_tipo(const C_NOMES *c_nomes, int i);

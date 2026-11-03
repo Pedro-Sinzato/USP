@@ -38,15 +38,12 @@ bool destroy_c_nomes(C_NOMES **c_nomes)
     return true;
 }
 
-bool read_item(char *file, C_NOMES *c_nomes)
+bool read_item(const char *file, C_NOMES *c_nomes)
 {
     if (file == NULL || c_nomes == NULL)
     {
         return false;
     }
-
-    /* permite chamar read_item mais de uma vez sem vazar memória */
-    libera_nomes(c_nomes);
 
     FILE *l_nomes = fopen(file, "r");
     if (l_nomes == NULL)

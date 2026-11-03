@@ -16,12 +16,11 @@ struct node
 
 struct stack
 {
-    NODE *top;
     ED base;
+    NODE *top;
     int size;
 };
 
-/* Adaptadores da vtable: ED ** / ED * -> STACK ** / STACK * */
 static bool stack_destroy(ED **self)
 {
     if (self == NULL || *self == NULL)
@@ -29,8 +28,8 @@ static bool stack_destroy(ED **self)
         return true;
     }
 
-    STACK *stack = (STACK *)*self;      /* variável local: não dá para */
-    bool ok = delete_stack(&stack);     /* converter ED ** em STACK ** */
+    STACK *stack = (STACK *)*self;
+    bool ok = delete_stack(&stack);
     *self = NULL;
 
     return ok;

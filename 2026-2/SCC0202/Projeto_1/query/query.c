@@ -7,7 +7,6 @@
 #include "query.h"
 #include "sim.h"
 #include "filter.h"
-#include "../nasa.h"
 #include "../descricao_item/item_reader.h"
 
 // FILTER: condição obrigatória para o registro ser aceito.
@@ -121,6 +120,22 @@ static int read_campos(int *destino, const C_NOMES *c_nomes)
 
     return n_campos;
 }
+// Converte "ASCE" ou "DESC" em ORDEM; devolve false se for outro texto
+static bool parse_ordem(const char *texto, ORDEM *ordem)
+{
+    if (strcmp(texto, "ASCE") == 0)
+    {
+        *ordem = ORDEM_ASC;
+        return true;
+    }
+    if (strcmp(texto, "DESC") == 0)
+    {
+        *ordem = ORDEM_DESC;
+        return true;
+    }
+    return false;
+}
+
 QUERY *query_reader(const char *query_name, C_NOMES* c_nomes)
 {
     FILE *query_file = fopen(query_name, "r");
@@ -220,9 +235,9 @@ QUERY *query_reader(const char *query_name, C_NOMES* c_nomes)
         {
             char *s_campo1 = strtok(NULL, "|");
             char *s_campo2 = strtok(NULL, "|");
-            char *s_direcao1  = strtok(NULL, "|");
-            char *s_direcao2  = strtok(NULL, "|");
-            if (!s_campo1 || !s_campo2 ||!s_direcao1 || !s_direcao2)
+            char *s_direcao1 = strtok(NULL, "|");   // opcionais: sem direção, ASCE
+            char *s_direcao2 = strtok(NULL, "|");
+            if (!s_campo1 || !s_campo2)
             {
                 continue; //linha vazia
             }
@@ -232,30 +247,11 @@ QUERY *query_reader(const char *query_name, C_NOMES* c_nomes)
             {
                  continue; //Campos inválidos
             }
-            
-            ORDEM direcao1;
-            if (strcmp(s_direcao1, "ASCE") == 0)
-            {
-                direcao1 = ORDEM_ASC;
-            }
-            else if (strcmp(s_direcao1, "DESC") == 0)
-            {
-                direcao1 = ORDEM_DESC;
-            }
-            else
-            {
-                continue; // direção inválida
-            }
-            ORDEM direcao2;
-            if (strcmp(s_direcao2, "ASCE") == 0)
-            {
-                direcao2 = ORDEM_ASC;
-            }
-            else if (strcmp(s_direcao2, "DESC") == 0)
-            {
-                direcao2 = ORDEM_DESC;
-            }
-            else
+
+            ORDEM direcao1 = ORDEM_ASC;
+            ORDEM direcao2 = ORDEM_ASC;
+            if ((s_direcao1 != NULL && !parse_ordem(s_direcao1, &direcao1)) ||
+                (s_direcao2 != NULL && !parse_ordem(s_direcao2, &direcao2)))
             {
                 continue; // direção inválida
             }
@@ -266,7 +262,7 @@ QUERY *query_reader(const char *query_name, C_NOMES* c_nomes)
             query->cross_dir[1] = direcao2;
             query->has_cross = true;
         }
-             else if (strcmp(tipo, "FILTER") == 0)
+        else if (strcmp(tipo, "FILTER") == 0)
         {
             char *s_campo = strtok(NULL, "|");
             char *s_operador = strtok(NULL, "|");
@@ -379,6 +375,27 @@ extern int query_cross(const QUERY *query, int i)
         return -1;
     }
     return query->cross_fields_pos[i];
+}
+extern ORDEM query_cross_dir(const QUERY *query, int i)
+{
+    if (query == NULL || query->has_cross == false || i < 0 || i > 1)
+    {
+        return ORDEM_ASC;
+    }
+    return query->cross_dir[i];
+}
+/* SIM */
+extern int query_n_sims(const QUERY *query)
+{
+    return (query == NULL) ? 0 : query->n_sims;
+}
+extern SIM *query_get_sim(const QUERY *query, int i)
+{
+    if (query == NULL || i < 0 || i >= query->n_sims)
+    {
+        return NULL;
+    }
+    return query->sims[i];
 }
 /* FILTER */
 extern int query_n_filters(const QUERY *query)

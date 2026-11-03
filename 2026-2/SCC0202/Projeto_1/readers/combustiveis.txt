@@ -6,7 +6,7 @@ CNPJ|string
 nome_rua|string
 n_rua|string
 complemento|string
-bairro|sitrng
+bairro|string
 cep|string
 produto|string
 d_coleta|string

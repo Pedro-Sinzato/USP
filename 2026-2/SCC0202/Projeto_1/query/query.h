@@ -1,13 +1,18 @@
 #ifndef QUERY_H
 #define QUERY_H
+
 #include "filter.h"
+#include "sim.h"
 #include "../descricao_item/item_reader.h"
 #include <stdbool.h>
-#include "../nasa.h"
 
 typedef struct query QUERY;
 
-typedef enum ordem { ORDEM_ASC, ORDEM_DESC } ORDEM;
+typedef enum ordem
+{
+    ORDEM_ASC,
+    ORDEM_DESC
+}ORDEM;
 
 extern QUERY *query_reader(const char *query_name, C_NOMES* c_nomes);
 extern bool delete_query(QUERY *query);
@@ -27,9 +32,15 @@ extern int query_group(const QUERY *query, int i);  // i = 0 é o nível mais ex
 /* CROSS */
 extern bool  query_has_cross(const QUERY *query);
 extern int query_cross(const QUERY *query, int i);  // i = 0 ou 1
+extern ORDEM query_cross_dir(const QUERY *query, int i);  // i = 0 ou 1
+
+/* SIM */
+extern int query_n_sims(const QUERY *query);
+extern SIM *query_get_sim(const QUERY *query, int i);
 
 //FILTER//
 extern const FILTER *query_get_filter(const QUERY *query, int i);
 extern int query_n_filters(const QUERY *query);
 extern bool apply_filters(const ITEM *item, const QUERY *query);
+
 #endif

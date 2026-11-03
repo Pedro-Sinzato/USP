@@ -1,68 +1,53 @@
 #ifndef LISTA_CRUZADA_H
 #define LISTA_CRUZADA_H
 
+#include <stdbool.h>
+
 #include "../item.h"
+#include "../../query/query.h"
 
 typedef struct orthogonal_list CROSS_LIST;
-typedef struct node NODE;
 
 /**
- * @brief Cria CROSS_LIST
- * @param[in] vetor de INTs que vem do query e indica a posicao dos campos no vetor FIELDS do item usados para a ordenacao das linha e coluna respectivamente
- * @param[in] vetor de ORDEMs que vem do query e indica quais as direcoes das ordenacoes das lista-linha e lista-coluna
+ * @brief Cria CROSS_LIST: cada ITEM entra ao mesmo tempo na lista-linha
+ * (ordenada pelo primeiro campo do CROSS) e na lista-coluna (ordenada pelo
+ * segundo campo), com um único nó de quatro ligações.
+ * @param[in] cross_fields_pos Posições (no ITEM) dos campos de ordenação da lista-linha e da lista-coluna, nessa ordem (vêm da QUERY).
+ * @param[in] cross_dir Direções de ordenação da lista-linha e da lista-coluna, nessa ordem (vêm da QUERY).
  * @return Ponteiro para a CROSS_LIST ou NULL no caso de erros.
  */
-CROSS_LIST *create_cross_list(int cross_fields_pos[2], ORDEM cross_dir[2]);
+CROSS_LIST *create_cross_list(const int cross_fields_pos[2], const ORDEM cross_dir[2]);
 
 /**
- * @brief Deleta CROSS_LIST
- * @param[out] Ponteiro duplo para CROSS_LIST
- * @return TRUE se conseguir e FALSE se não conseguir.
+ * @brief Deleta CROSS_LIST e todos os ITEMs que ela guarda.
+ * @param[in,out] cross_list Endereço do ponteiro; vira NULL ao final.
+ * @return true se conseguiu (ou se não havia lista), false caso contrário.
  */
 bool delete_cross_list(CROSS_LIST **cross_list);
 
 /**
- * @brief Adicona um ITEM nas lista-linha e lista-coluna na posicao determinada pela ordenacao da lista baseado nos campos estabelecidos na criacao da lista cruzada.
- * @param[out] Ponteiro  para a LINKED_LIST.
- * @param[in] endereço do item a ser inserido nas listas.
- * @return TRUE se conseguir e FALSE se não conseguir (Lembrando que se o item nao tiver o field [campo do tipo x] usado na ordenacao da lista-linha ou da lista-coluna, isso leva a um erro).
+ * @brief Insere o ITEM na lista-linha e na lista-coluna, nas posições
+ * determinadas pela ordenação de cada uma. Itens iguais na ordenação ficam na
+ * ordem de chegada (inserção estável).
+ * @param[in,out] cross_list Ponteiro para a CROSS_LIST.
+ * @param[in] item ITEM a inserir (a lista passa a ser dona dele).
+ * @return true se conseguiu; false se a lista/ITEM for inválido ou algum dos
+ * dois campos de ordenação do ITEM não puder ser ordenado (nesse caso o ITEM
+ * não é inserido em nenhuma das listas e continua sendo do chamador).
  */
-bool add_item(CROSS_LIST *cross_list, ITEM* item);
+bool cross_list_add_item(CROSS_LIST *cross_list, ITEM *item);
 
-/** As funcoes de remocao foram removidas por obsolecencia
-
-
-* @brief Remove o ITEM na primeira posicao da lista indicada (lista-linha ou lista-coluna).
- * @param[out] Ponteiro  para a CROSS_LIST.
- * @param[in] numero que indica se o item a ser removido e o primeiro da lista-linha (listIndicator == 0) ou da lista-coluna (listIndicador == 1)
- * @return TRUE se conseguir e FALSE se não conseguir ou se o listIndicator for invalido.
-
-bool remove_start(CROSS_LIST *cross_list, int listIndicator);
-/**
- * @brief Remove ITEM correspondente a KEY de CROSS_LIST.
- * @param[out] Ponteiro  para a LINKED_LIST.
- * @param[in] key - Ponteiro para o Key (Conteúdo) do ITEM (ponteiro pois o tipo do key e indeterminado).
- * @param[in] keyType - determina qual o tipo do item a ser inserido para que um metodo de comparacao apropriado possa ser usado
- * @param[in] listIndicator - numero que indica se a chave do item a ser removido deve ser procurado a partir da lista-linha (listIndicator == 0) ou da lista-coluna (listIndicador == 1)
- * @return TRUE se conseguir e FALSE se não conseguir ou se o listIndicator for invalido.
-
-bool remove_search(CROSS_LIST *linked_list, void *key, DATATYPE keyType, int listIndicator);
-/**
- * @brief Remove ITEM no fim de LINKED_LIST.
- * @param[out] Ponteiro  para a LINKED_LIST.
- * @param[in] numero que indica se o item a ser removido e o ultimo da lista-linha (listIndicator == 0) ou da lista-coluna (listIndicador == 1)
- * @return TRUE se conseguir e FALSE se não conseguir ou se o listIndicator for invalido.
- bool remove_end(CROSS_LIST *cross_list, int listIndicator);
- */
-
+/** As funcoes de remocao foram removidas por obsolecencia */
 
 /**
- * @brief Busca por ITEM correspondente a KEY de CROSS_LIST.
- * @param[in] Ponteiro para CROSS_LIST.
- * @param[in] key - Ponteiro para o Key (Conteúdo) do ITEM (ponteiro para void pois o tipo do key e indeterminado).
- * @param[in] field - int que indica em qual campo o valor de key esta localizado.
- * @return Ponteiro para ITEM, NULL em caso de erros (lista/item inexistente ou nao encontrado, tipo de campo invalido, etc).
+ * @brief Busca por ITEM correspondente a KEY de CROSS_LIST. Percorre a
+ * lista-coluna se field for o campo da coluna; senão, a lista-linha.
+ * @param[in] cross_list Ponteiro para CROSS_LIST.
+ * @param[in] key Ponteiro para o valor buscado: int *, double *, char *, bool *
+ * ou, para string, a própria string C (const char *).
+ * @param[in] field Posição do campo onde o valor será procurado.
+ * @return Ponteiro para ITEM, NULL se não encontrado ou em caso de erro.
  */
-ITEM *search(CROSS_LIST *cross_list, void *key, int field);
+ITEM *cross_list_search(const CROSS_LIST *cross_list, const void *key, int field);
 
 #endif

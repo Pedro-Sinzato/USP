@@ -6,12 +6,14 @@
 #include "item.h"
 #include "lista_cruzada/orthogonal_list.h"
 #include "lista_ordenada/ordered_list.h"
-#include "query/query.h"
+#include "lista_generalizada/gen_list.h"
+#include "lista_sequencial/sequencial_list.h"
+#include "../query/query.h"
+#include "fila/queue.h"
 #include "stack/stack.h"
 #include "lista_cabeca/lista_cabeca.h"
 #include "linked_list/linked_list.h"
 
-/* ---------- nomes <-> tipos ---------- */
 
 static const struct
 {
@@ -38,35 +40,47 @@ ED_TYPES ed_type_from_name(const char *name)
                 return ED_NAMES[i].type;
         }
     }
-    return ED_INVALID; /* precisa ser adicionado ao enum em estruturas_dados.h */
+    return ED_INVALID;
 }
 
-/* ---------- fábrica ---------- */
-
-ED *create_ed(ED_TYPES type)
+ED *create_ed(ED_TYPES type, const QUERY *query)
 {
     switch (type)
     {
     case PILHA:
         return (ED *)create_stack();
     case FILA:
-        return (ED *)create_query();
+        return (ED *)create_queue();
     case LISTA_SEQ:
+        return (ED *)create_sequencial_list();
     case LISTA_ENC:
         return (ED *)create_linked_list();
     case LISTA_CABECA:
         return (ED *)create_lista_cabeca();
     case LISTA_ORD:
-        return (ED *)create_ordered_list();
-    case LISTA_GEN:
+        return (ED *)create_ordered_list(query); /* sem ORDER: primeiro campo, ascendente */
     case LISTA_CRUZ:
-        return (ED *)create_cross_list();
+    {
+        /* sem CROSS (ex.: a lista é a base): primeiro campo nas duas listas, ascendente */
+        int campos[2] = {0, 0};
+        ORDEM dirs[2] = {ORDEM_ASC, ORDEM_ASC};
+
+        if (query != NULL && query_has_cross(query))
+        {
+            for (int i = 0; i < 2; i++)
+            {
+                campos[i] = query_cross(query, i);
+                dirs[i] = query_cross_dir(query, i);
+            }
+        }
+        return (ED *)create_cross_list(campos, dirs);
+    }
+    case LISTA_GEN:
+        return (ED *)create_gen_list(query); /* lista sem agrupamento */
     default:
         return NULL;
     }
 }
-
-/* ---------- despacho pela vtable ---------- */
 
 bool destroy_ed(ED **self)
 {
@@ -76,7 +90,6 @@ bool destroy_ed(ED **self)
     if ((*self)->ed_vtable == NULL || (*self)->ed_vtable->destroy_ed == NULL)
         return false;
 
-    /* A função concreta libera tudo e põe *self em NULL. */
     return (*self)->ed_vtable->destroy_ed(self);
 }
 
@@ -100,18 +113,4 @@ void for_each_ed(const ED *self, ED_VISIT visit, void *ctx)
         return;
 
     self->ed_vtable->for_each_ed(self, visit, ctx);
-}
-
-/* ---------- depuração ---------- */
-
-static bool print_visit(const ITEM *item, void *ctx)
-{
-    (void)ctx;
-    item_print(item);
-    return true;
-}
-
-void print_ed(const ED *self)
-{
-    for_each_ed(self, print_visit, NULL);
 }

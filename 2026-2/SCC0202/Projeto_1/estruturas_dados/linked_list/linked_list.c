@@ -16,13 +16,12 @@ struct node
 
 struct linked_list
 {
-    ED base;    /* PRECISA ser o primeiro membro */
+    ED base;
     NODE *head;
     NODE *tail;
     int size;
 };
 
-/* Adaptadores da vtable: ED ** / ED * -> LINKED_LIST ** / LINKED_LIST * */
 static bool linked_list_destroy(ED **self)
 {
     if (self == NULL || *self == NULL)
