@@ -1,0 +1,1 @@
+FILTER|asteroid_designation|==|T07

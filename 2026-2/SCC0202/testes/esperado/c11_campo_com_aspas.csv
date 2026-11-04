@@ -1,0 +1,2 @@
+asteroid_designation,asteroid_fullname,close_approach_date,year,month,distance_au,velocity_km_s,absolute_magnitude,days_until_approach,is_past_event,is_future_event,risk_score,panic_level,threat_category,panic_verdict,on_sentry_list,sentry_impact_prob,sentry_torino_scale,sentry_palermo_scale,sentry_diameter_km
+T07,"(T07) Rock, ""Big"" One",2024-12-15,2024,12,0.05,13.5,17.5,-718,True,False,0.5,10,Media,nivel 10,False,0.007,3,-3.5,0.35

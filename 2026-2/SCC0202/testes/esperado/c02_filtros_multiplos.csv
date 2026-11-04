@@ -1,0 +1,8 @@
+asteroid_designation,asteroid_fullname,close_approach_date,year,month,distance_au,velocity_km_s,absolute_magnitude,days_until_approach,is_past_event,is_future_event,risk_score,panic_level,threat_category,panic_verdict,on_sentry_list,sentry_impact_prob,sentry_torino_scale,sentry_palermo_scale,sentry_diameter_km
+T09,(T09) Rocha 9,2026-10-15,2026,10,0.2,16.5,18.5,10,False,True,0.2,5,Critica,nivel 5,False,0.009,1,-4.5,0.45
+T11,(T11) Rocha 11,2028-08-15,2028,8,0.35,19.5,19.5,738,False,True,0.9,0,Baixa,nivel 0,False,0.011,3,-5.5,0.55
+T12,(T12) Rocha 12,2029-01-15,2029,1,0.425,21,20,1096,False,True,0.25,3,Media,nivel 3,True,0.012,0,-6,0.6
+T13,(T13) Rocha 13,2030-06-15,2030,6,0.5,22.5,20.5,1466,False,True,0.6,6,Alta,nivel 6,False,0.013,1,-6.5,0.65
+T14,(T14) Rocha 14,2026-11-15,2026,11,0.075,24,21,11,False,True,0.95,9,Critica,nivel 9,False,0.014,2,-7,0.7
+T15,(T15) Rocha 15,2027-04-15,2027,4,0.15,25.5,21.5,369,False,True,0.3,1,Alta,nivel 1,False,0.015,3,-7.5,0.75
+T19,(T19) Rocha 19,2029-12-15,2029,12,0.45,31.5,23.5,1107,False,True,0.7,2,Alta,nivel 2,False,0.019,3,-9.5,0.95

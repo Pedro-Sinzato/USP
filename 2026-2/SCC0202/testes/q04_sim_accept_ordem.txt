@@ -1,0 +1,5 @@
+FILTER|is_future_event|==|True
+SIM|risk_score|0.8|0.4|2
+SIM|distance_au|0.1|0.2|1
+ACCEPT|0.28
+ORDER|similarity|DESC
