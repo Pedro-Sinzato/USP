@@ -8,7 +8,7 @@
 #include "../estruturas_dados/item.h"
 #include "../leitor_argumentos/argument_reader.h"
 
-#define LINE_SIZE 2048
+#define LINE_SIZE 4096
 
 // Devolve o próximo campo da linha e avança *cursor para o campo seguinte.
 // Respeita aspas (inclusive "" como aspa literal) e campos vazios. Devolve NULL se não há mais campos

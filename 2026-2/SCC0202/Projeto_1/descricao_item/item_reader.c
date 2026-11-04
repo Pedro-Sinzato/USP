@@ -6,7 +6,7 @@
 #include "item_reader.h"
 
 #define MAX_CAMPOS 20
-#define MAX_LINHA 128
+#define MAX_LINHA 1024
 
 struct campos_nomes
 {
