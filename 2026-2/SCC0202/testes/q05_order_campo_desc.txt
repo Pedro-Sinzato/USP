@@ -1,2 +1,0 @@
-FILTER|year|>=|2020
-ORDER|risk_score|DESC

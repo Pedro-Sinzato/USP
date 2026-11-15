@@ -1,2 +1,0 @@
-FILTER|is_future_event|==|True
-CROSS|threat_category|year
