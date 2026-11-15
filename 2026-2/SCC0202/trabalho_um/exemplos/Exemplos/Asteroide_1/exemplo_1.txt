@@ -1,0 +1,3 @@
+FILTER|year|>=|2022
+FILTER|is_future_event|==|True
+FILTER|threat_category|!=|Nenhuma

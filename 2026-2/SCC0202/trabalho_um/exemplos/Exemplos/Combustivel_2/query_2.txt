@@ -1,0 +1,5 @@
+FILTER|regiao|==|SE
+FILTER|produto|==|ETANOL
+SIM|v_venda|4.50|0.50|1.0
+ACCEPT|0.80
+ORDER|v_venda|ASCE

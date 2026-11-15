@@ -1,0 +1,10 @@
+./trabalho.exe -reader combustiveis.txt -input combustivel.csv -base lista_enc -result lista_seq -query query_1.txt -output resultado_1.csv -top-k 10 -limit 1000
+
+STATUS=OK
+INPUT_RECORDS=1000
+MATCHED_RECORDS=20
+OUTPUT_RECORDS=10
+LOAD_MS=3.000
+SEARCH_MS=0.000
+RESULT_INSERT_MS=0.000
+WRITE_MS=1.000

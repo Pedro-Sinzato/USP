@@ -1,0 +1,10 @@
+./trabalho.exe -reader nasa.txt -input asteroid_dataset_20251019.csv -base lista_enc -result lista_ord -query exemplo_2.txt -output resultado_1.csv -top-k 10 -limit 0
+
+STATUS=OK
+INPUT_RECORDS=89227
+MATCHED_RECORDS=89227
+OUTPUT_RECORDS=10
+LOAD_MS=185.000
+SEARCH_MS=10.000
+RESULT_INSERT_MS=287943.000
+WRITE_MS=1.000

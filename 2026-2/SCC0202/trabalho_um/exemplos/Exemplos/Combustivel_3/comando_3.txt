@@ -1,0 +1,9 @@
+ ./trabalho.exe -reader combustiveis.txt -input combustivel.csv -base lista_gen -result lista_cruz -query query_3.txt -output resultado_3.csv -top-k 15 -limit 0
+STATUS=OK
+INPUT_RECORDS=422418
+MATCHED_RECORDS=5019
+OUTPUT_RECORDS=15
+LOAD_MS=704.000
+SEARCH_MS=38.000
+RESULT_INSERT_MS=433.000
+WRITE_MS=1.000

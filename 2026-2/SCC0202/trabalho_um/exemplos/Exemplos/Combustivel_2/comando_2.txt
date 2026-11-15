@@ -1,0 +1,9 @@
+ ./trabalho.exe -reader combustiveis.txt -input combustivel.csv -base pilha -result lista_ord -query query_2.txt -output resultado_1.csv -top-k 15 -limit 500
+STATUS=OK
+INPUT_RECORDS=500
+MATCHED_RECORDS=8
+OUTPUT_RECORDS=8
+LOAD_MS=2.000
+SEARCH_MS=0.000
+RESULT_INSERT_MS=0.000
+WRITE_MS=1.000

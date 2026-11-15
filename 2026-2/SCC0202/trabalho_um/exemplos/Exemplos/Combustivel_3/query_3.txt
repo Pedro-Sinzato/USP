@@ -1,0 +1,5 @@
+FILTER|regiao|==|S
+FILTER|produto|==|DIESEL S10
+FILTER|v_venda|>=|7.00
+GROUP|estado|bandeira
+CROSS|estado|ASCE|bandeira|ASCE

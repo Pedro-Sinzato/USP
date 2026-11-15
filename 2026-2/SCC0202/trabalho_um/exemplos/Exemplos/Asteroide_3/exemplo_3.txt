@@ -1,0 +1,2 @@
+FILTER|is_future_event|==|True
+GROUP|threat_category|year

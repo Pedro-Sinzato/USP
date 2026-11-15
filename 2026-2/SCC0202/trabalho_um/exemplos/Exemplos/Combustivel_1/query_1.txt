@@ -1,0 +1,3 @@
+FILTER|estado|==|SP
+FILTER|produto|==|GASOLINA
+FILTER|v_venda|<=|6.00
