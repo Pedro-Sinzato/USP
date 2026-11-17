@@ -4,6 +4,8 @@
 
 NODE *root = insert(root, newitem(value), mode)
 
+Mode: BST, AVL e LLRB
+
 #### Buscando na árvore
 
 NODE *target = lookup(root, value);
