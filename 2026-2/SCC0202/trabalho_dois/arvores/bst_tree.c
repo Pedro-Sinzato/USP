@@ -1,9 +1,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "bst_tree.h"
-#include "bst_node.h"
 #include "avl.h"
 #include "llrb.h"
+
+//Protótipos, criar funções depois.
+int int_insert(NODE* treep, NODE *newp);
+int double_insert(NODE* treep, NODE *newp);
+int char_insert(NODE* treep, NODE *newp);
+int str_insert(NODE* treep, NODE *newp);
+int bool_insert(NODE* treep, NODE *newp);
 
 NODE *newitem(int value)
 {
@@ -22,7 +28,7 @@ NODE *newitem(int value)
 }
 
 /* ---------- Inserção 1: BST simples ---------- */
-static NODE *bst_insert(NODE *treep, NODE *newp)
+static NODE *bst_insert(NODE *treep, NODE *newp,  int (*fn)(NODE*, NODE*))
 {
     if(treep == NULL)
     {
@@ -33,19 +39,19 @@ static NODE *bst_insert(NODE *treep, NODE *newp)
         free(newp);
         return treep;
     }
-    else if(newp->value < treep->value)
+    else if((*fn)(treep, newp))
     {
-        treep->left = bst_insert(treep->left, newp);
+        treep->left = bst_insert(treep->left, newp, *fn);
     }
     else
     {
-        treep->right = bst_insert(treep->right, newp);
+        treep->right = bst_insert(treep->right, newp, *fn);
     }
     return treep;
 }
 
 /* ---------- Inserção 2: AVL (balanceamento em avl.c) ---------- */
-static NODE *avl_insert(NODE *treep, NODE *newp)
+static NODE *avl_insert(NODE *treep, NODE *newp, int (*fn)(NODE*, NODE*))
 {
     if(treep == NULL)
     {
@@ -57,19 +63,19 @@ static NODE *avl_insert(NODE *treep, NODE *newp)
         free(newp);
         return treep;
     }
-    else if(newp->value < treep->value)
+    else if((*fn)(treep, newp))
     {
-        treep->left = avl_insert(treep->left, newp);
+        treep->left = avl_insert(treep->left, newp, *fn);
     }
     else
     {
-        treep->right = avl_insert(treep->right, newp);
+        treep->right = avl_insert(treep->right, newp, *fn);
     }
     return avl_rebalance(treep);
 }
 
 /* ---------- Inserção 3: LLRB (balanceamento em llrb.c) ---------- */
-static NODE *llrb_insert(NODE *treep, NODE *newp)
+static NODE *llrb_insert(NODE *treep, NODE *newp, int (*fn)(NODE*, NODE*))
 {
     if(treep == NULL)
     {
@@ -84,28 +90,47 @@ static NODE *llrb_insert(NODE *treep, NODE *newp)
         free(newp);
         return treep;
     }
-    else if(newp->value < treep->value)
+    else if((*fn)(treep, newp))
     {
-        treep->left = llrb_insert(treep->left, newp);
+        treep->left = llrb_insert(treep->left, newp, *fn);
     }
     else
     {
-        treep->right = llrb_insert(treep->right, newp);
+        treep->right = llrb_insert(treep->right, newp, *fn);
     }
     return llrb_fixup(treep);
 }
 
-NODE *insert(NODE *treep, NODE *newp, TREE_MODE mode)
+NODE *insert(NODE *treep, NODE *newp, TREE_MODE mode, int type)
 {
+    int (*fn)(NODE*, NODE*);
+    switch (type)
+    {
+        case INT:
+            fn = int_insert;
+            break;
+        case DOUBLE:
+            fn = double_insert;
+            break;
+        case STRING:
+            fn = str_insert;
+            break;
+        case CHAR:
+            fn = char_insert;
+            break;
+        case BOOL:
+            fn = bool_insert;
+    }
+
     switch(mode)
     {
         case AVL:
-            return avl_insert(treep, newp);
+            return avl_insert(treep, newp, fn);
         case LLRB:
-            return llrb_blacken(llrb_insert(treep, newp));
+            return llrb_blacken(llrb_insert(treep, newp, fn));
         case BST:
         default:
-            return bst_insert(treep, newp);
+            return bst_insert(treep, newp, fn);
     }
 }
 

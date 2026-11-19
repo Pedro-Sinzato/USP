@@ -11,6 +11,7 @@ struct node
     NODE *left;  /* lesser */
     NODE *right; /* greater */
 
+     /*
      *   AVL  -> info.height (folha = 1, NULL = 0)
      *   LLRB -> info.color  (RED ou BLACK)
      *   BST  -> não usa
