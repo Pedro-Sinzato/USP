@@ -11,6 +11,9 @@ int char_insert(NODE* treep, NODE *newp);
 int str_insert(NODE* treep, NODE *newp);
 int bool_insert(NODE* treep, NODE *newp);
 
+//Igual: 0; newp < treep: 1; newp > treep: -1;
+
+
 NODE *newitem(int value)
 {
     NODE *newp;
@@ -34,12 +37,12 @@ static NODE *bst_insert(NODE *treep, NODE *newp,  int (*fn)(NODE*, NODE*))
     {
         return newp;
     }
-    if(newp->value == treep->value)
+    if(fn == 0)
     {
         free(newp);
         return treep;
     }
-    else if((*fn)(treep, newp))
+    else if((*fn)(treep, newp) == 1)
     {
         treep->left = bst_insert(treep->left, newp, *fn);
     }
@@ -58,12 +61,12 @@ static NODE *avl_insert(NODE *treep, NODE *newp, int (*fn)(NODE*, NODE*))
         avl_init(newp);
         return newp;
     }
-    if(newp->value == treep->value)
+    if(fn == 0)
     {
         free(newp);
         return treep;
     }
-    else if((*fn)(treep, newp))
+    else if((*fn)(treep, newp) == 1)
     {
         treep->left = avl_insert(treep->left, newp, *fn);
     }
@@ -85,12 +88,12 @@ static NODE *llrb_insert(NODE *treep, NODE *newp, int (*fn)(NODE*, NODE*))
 
     llrb_split(treep);
 
-    if(newp->value == treep->value)
+    if(fn == 0)
     {
         free(newp);
         return treep;
     }
-    else if((*fn)(treep, newp))
+    else if((*fn)(treep, newp) == 1)
     {
         treep->left = llrb_insert(treep->left, newp, *fn);
     }
